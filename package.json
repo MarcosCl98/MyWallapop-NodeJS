@@ -1,0 +1,10 @@
+{
+  "name": "sdi-actividad2-104-106",
+  "Decription": "Wallapop",
+  "version": "1.0.0",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "swig": "^1.4.2"
+  }
+}
