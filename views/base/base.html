@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Head -->
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script
+            src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js">
+
+    </script>
+    <script
+            src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js">
+
+    </script>
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/custom.css"/>
+
+    <title>MyWallapop</title>
+</head>
+
+<!-- Nav bar -->
+<nav class="navbar">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#myNavbar">
+                <span class="icon-bar"></span> <span class="icon-bar"></span> <span
+                    class="icon-bar"></span>
+            </button>
+            <a href="/"> <img src="/img/Logo.png" alt="logo"/>
+            </a>
+        </div>
+        <div class="collapse navbar-collapse navbar-expand-lg navbar-dark fixed-top" id="myNavbar"
+             th:object="${user}">
+            <ul class="nav navbar-nav">
+
+                <li><a href="/" style="color: black"> <i
+                        class="glyphicon glyphicon-home"></i> <span>Inicio</span>
+                </a></li>
+                <li id="users-menu" class="dropdown"
+                    sec:authorize="hasRole('ROLE_ADMIN')"><a
+                        class="dropdown-toggle" data-toggle="dropdown" href="#"
+                        style="color: black"> <i class="glyphicon glyphicon-user"></i>
+                    <span>Usuarios</span><span class="caret"></span>
+                </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/user/list"
+                               style="color: black">Lista usuarios</a></li>
+                    </ul>
+                </li>
+                <li id="bids-menu" class="dropdown"
+                    sec:authorize="hasRole('ROLE_USER')"><a
+                        class="dropdown-toggle" data-toggle="dropdown" href="#"
+                        style="color: black"> <i class="glyphicon glyphicon-lock">
+                </i> <span>Ofertas</span> <span class="caret"></span>
+                </a>
+                    <ul class="dropdown-menu">
+                        <li sec:authorize="hasRole('ROLE_USER')"><a
+                                href="/bid/add">Agregar una oferta</a></li>
+                        <li sec:authorize="hasRole('ROLE_USER')"><a href="/bid/list"
+                                                                    >Lista de ofertas</a></li>
+                        <li sec:authorize="hasRole('ROLE_USER')"><a
+                                href="/bid/mybids">Mis ofertas</a></li>
+                        <li sec:authorize="hasRole('ROLE_USER')"><a
+                                href="/bid/mybuyedbids">Mis ofertas compradas</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li sec:authorize="!isAuthenticated()"><a href="/signup"
+                                                          style="color: black"><span
+                        class="glyphicon glyphicon-user"></span>
+                    Registrarse</a></li>
+                <li sec:authorize="!isAuthenticated()"><a href="/login"
+                                                          style="color: black"><span
+                        class="glyphicon glyphicon-log-in"></span>
+                    Iniciar sesion</a></li>
+
+                <li sec:authorize="isAuthenticated()" id="user-menu"
+                    class="dropdown"><a class="dropdown-toggle"
+                                        data-toggle="dropdown" role="button" aria-haspopup="true"
+                                        aria-expanded="false" href="#" style="color: black"> <span
+                        th:text="${session.email}"></span> <span class="caret"></span>
+                </a>
+                    <ul class="dropdown-menu">
+                        <li sec:authorize="hasRole('ROLE_USER')"
+                            style="text-align: center; font-size: 16pt" id="DropDownInfo"><a
+                                th:text="#{money.available}"></a></li>
+                        <li sec:authorize="hasRole('ROLE_USER')"
+                            style="text-align: center; font-size: 16pt" id="DropDownInfo2"><a
+                                th:text="${session.money}"></a></li>
+                        <li sec:authorize="hasRole('ROLE_USER')" id="DropDownInfo3"><a
+                                href="/conversation"
+                                style="color: black; text-align: center; font-weight: bold">
+                            <i class="glyphicon glyphicon-envelope"></i> <span
+                                th:text="#{nav.conversations}"></span>
+                        </a></li>
+                        <li sec:authorize="isAuthenticated()"><a href="/logout"
+                                                                 style="color: red; font-size: 18; text-align: center; font-weight: bold">
+                            <i class="glyphicon glyphicon-log-out"></i> <span
+                                th:text="#{logout.message}"></span>
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Contenido, acepta mensajes como parametro -->
+<div class="container">
+    <script>
+        var mensaje = getUrlParameter('mensaje');
+        var tipoMensaje = getUrlParameter('tipoMensaje');
+        if (mensaje != "") {
+            if (tipoMensaje == "") {
+                tipoMensaje = 'alert-info';
+            }
+            $(".container")
+                .append("<div class='alert " + tipoMensaje + "'>" + mensaje + " </div>");
+        }
+
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' :
+                decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+    </script>
+
+    <!-- Contenido -->
+    {% block contenido_principal %}
+    <!-- Posible contenido por defecto -->
+    {% endblock %}
+
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+        <span>SDI - MyWallapop &copy; by Marcos & Martin</span>
+    </div>
+</footer>
+</body>
+</html>

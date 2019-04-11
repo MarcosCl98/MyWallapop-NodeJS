@@ -1,0 +1,55 @@
+{% extends "../base/base.html" %}
+{% block contenido_principal %}
+<h2 th:text="#{list.users}"></h2>
+<p th:text="#{list.p2}"></p>
+<button class="btn btn-default" id="deleteButton">Borrar seleccionados
+</button>
+<script>
+    $("#deleteButton").click(function () {
+        var urlUpdate = '/user/delete/';
+        var table = document.getElementById('tabla');
+        var listIds = new Array();
+        var totalUsersToDelete = 0;
+        for (var r = 1, n = table.rows.length; r < n; r++) {
+            // Parse id users
+            var id = table.rows[r].cells[1].innerHTML;
+            //If checkbox is mark, added to list
+            if (document.getElementById(id).checked) {
+                listIds[totalUsersToDelete] = id;
+                totalUsersToDelete++;
+            }
+        }
+        if (listIds.length > 0)
+            window.location.replace(urlUpdate + listIds);
+    });
+</script>
+<div class="table-responsive">
+    <table id="tabla" class="table table-hover">
+        <thead>
+        <tr>
+            <th class="col-md-1"></th>
+            <th>ID</th>
+            <th>Usuarios</th>
+            <th class="col-md-1"></th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            <!-- if {{session.email}} == {{user.email}} -->
+                <td><input type="checkbox" id='{{ user.id }}'></input></td>
+            <!--% else %
+                <td><input type="checkbox" id='{{ user.id }}' disabled></input></td>
+            % endif %-->
+            <td>{{user.id}}</td>
+            <td>{{user.email}}</td>
+            <td></td>
+            <td>{{user.name}}</td>
+            <td>{{user.lastname}}</td>
+        {% endfor %}
+        </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
