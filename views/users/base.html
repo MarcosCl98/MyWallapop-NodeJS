@@ -38,8 +38,7 @@
                 <li><a href="/" style="color: black"> <i
                         class="glyphicon glyphicon-home"></i> <span>Inicio</span>
                 </a></li>
-                <li id="users-menu" class="dropdown"
-                    sec:authorize="hasRole('ROLE_ADMIN')"><a
+                <li id="users-menu" class="dropdown"><a
                         class="dropdown-toggle" data-toggle="dropdown" href="#"
                         style="color: black"> <i class="glyphicon glyphicon-user"></i>
                     <span>Usuarios</span><span class="caret"></span>
@@ -49,60 +48,32 @@
                                style="color: black">Lista usuarios</a></li>
                     </ul>
                 </li>
-                <li id="bids-menu" class="dropdown"
-                    sec:authorize="hasRole('ROLE_USER')"><a
+                <li id="bids-menu" class="dropdown"><a
                         class="dropdown-toggle" data-toggle="dropdown" href="#"
                         style="color: black"> <i class="glyphicon glyphicon-lock">
                 </i> <span>Ofertas</span> <span class="caret"></span>
                 </a>
                     <ul class="dropdown-menu">
-                        <li sec:authorize="hasRole('ROLE_USER')"><a
+                        <li><a
                                 href="/bid/add">Agregar una oferta</a></li>
-                        <li sec:authorize="hasRole('ROLE_USER')"><a href="/bid/list"
+                        <li><a href="/bid/list"
                                                                     >Lista de ofertas</a></li>
-                        <li sec:authorize="hasRole('ROLE_USER')"><a
+                        <li><a
                                 href="/bid/mybids">Mis ofertas</a></li>
-                        <li sec:authorize="hasRole('ROLE_USER')"><a
+                        <li><a
                                 href="/bid/mybuyedbids">Mis ofertas compradas</a></li>
                     </ul>
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li sec:authorize="!isAuthenticated()"><a href="/signup"
+                <li ><a href="/signup"
                                                           style="color: black"><span
                         class="glyphicon glyphicon-user"></span>
                     Registrarse</a></li>
-                <li sec:authorize="!isAuthenticated()"><a href="/login"
+                <li ><a href="/login"
                                                           style="color: black"><span
                         class="glyphicon glyphicon-log-in"></span>
                     Iniciar sesion</a></li>
-
-                <li sec:authorize="isAuthenticated()" id="user-menu"
-                    class="dropdown"><a class="dropdown-toggle"
-                                        data-toggle="dropdown" role="button" aria-haspopup="true"
-                                        aria-expanded="false" href="#" style="color: black"> <span
-                        th:text="${session.email}"></span> <span class="caret"></span>
-                </a>
-                    <ul class="dropdown-menu">
-                        <li sec:authorize="hasRole('ROLE_USER')"
-                            style="text-align: center; font-size: 16pt" id="DropDownInfo"><a
-                                th:text="#{money.available}"></a></li>
-                        <li sec:authorize="hasRole('ROLE_USER')"
-                            style="text-align: center; font-size: 16pt" id="DropDownInfo2"><a
-                                th:text="${session.money}"></a></li>
-                        <li sec:authorize="hasRole('ROLE_USER')" id="DropDownInfo3"><a
-                                href="/conversation"
-                                style="color: black; text-align: center; font-weight: bold">
-                            <i class="glyphicon glyphicon-envelope"></i> <span
-                                th:text="#{nav.conversations}"></span>
-                        </a></li>
-                        <li sec:authorize="isAuthenticated()"><a href="/logout"
-                                                                 style="color: red; font-size: 18; text-align: center; font-weight: bold">
-                            <i class="glyphicon glyphicon-log-out"></i> <span
-                                th:text="#{logout.message}"></span>
-                        </a></li>
-                    </ul>
-                </li>
             </ul>
         </div>
     </div>

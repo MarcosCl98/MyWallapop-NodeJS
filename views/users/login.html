@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block contenido_principal %}
+<div class="container">
+    <h2>Indentifícate</h2>
+    <form class="form-horizontal" method="post" action="/login">
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="email">Email:</label>
+            <div class="col-sm-10">
+                <input type="email" class="form-control" name="username"
+                       th:placeholder= "uo11111@uniovi.es"  />
+                </span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-2" for="password"
+            >Contraseña:</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" name="password"
+                       th:placeholder="abc1234" />
+                </span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary" >Iniciar sesion</button>
+            </div>
+        </div>
+        <input type="hidden" name="${_csrf.parameterName}"
+               value="${_csrf.token}" />
+    </form>
+</div>
+{% endblock %}
