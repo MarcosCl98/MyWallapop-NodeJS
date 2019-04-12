@@ -6,21 +6,36 @@
 </button>
 <script>
     $("#deleteButton").click(function () {
-        var urlUpdate = '/user/delete/';
-        var table = document.getElementById('tabla');
-        var listIds = new Array();
-        var totalUsersToDelete = 0;
-        for (var r = 1, n = table.rows.length; r < n; r++) {
+        let urlUpdate = '/user/delete';
+        let table = document.getElementById('tabla');
+        let listIds = new Array();
+        let totalUsersToDelete = 0;
+        for (let r = 1, n = table.rows.length; r < n; r++) {
             // Parse id users
-            var id = table.rows[r].cells[1].innerHTML;
+            let id = table.rows[r].cells[1].innerHTML;
             //If checkbox is mark, added to list
             if (document.getElementById(id).checked) {
                 listIds[totalUsersToDelete] = id;
                 totalUsersToDelete++;
             }
         }
-        if (listIds.length > 0)
-            window.location.replace(urlUpdate + listIds);
+        if (listIds.length > 0) {
+            //Metodo para poder mandar un formulario y la peticion a traves de post.
+            //Creamos el formulario y lo hacemos post y accion
+            let form = document.createElement("form");
+            form.setAttribute("method", "post");
+            form.setAttribute("action", urlUpdate);
+
+            //Pasamos el parametro que queremos poner.
+            let hiddenField = document.createElement("input");
+            hiddenField.setAttribute("type", "hidden");
+            hiddenField.setAttribute("name", "listUserID");
+            hiddenField.setAttribute("value", listIds);
+            form.appendChild(hiddenField);
+
+            document.body.appendChild(form);
+            form.submit();
+        }
     });
 </script>
 <div class="table-responsive">
@@ -37,18 +52,19 @@
         </thead>
         <tbody>
         {% for user in users %}
+        <tr>
         <!-- if {{session.email}} == {{user.email}} -->
-        <td><input type="checkbox" id='{{ user._id }}'></input></td>
-        <!--% else %
-            <td><input type="checkbox" id='{{ user.id }}' disabled></input></td>
-        % endif %-->
-        <td>{{user._id}}</td>
-        <td>{{user.email}}</td>
-        <td></td>
-        <td>{{user.nombre}}</td>
-        <td>{{user.apellido}}</td>
-        {% endfor %}
+            <td><input type="checkbox" id='{{ user._id.toString() }}'></td>
+            <!--% else %
+                <td><input type="checkbox" id='{{ user.id }}' disabled></input></td>
+            % endif %-->
+            <td>{{user._id.toString()}}</td>
+            <td>{{user.email}}</td>
+            <td></td>
+            <td>{{user.nombre}}</td>
+            <td>{{user.apellido}}</td>
         </tr>
+        {% endfor %}
         </tbody>
     </table>
 </div>

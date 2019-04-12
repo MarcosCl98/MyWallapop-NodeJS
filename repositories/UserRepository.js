@@ -7,7 +7,7 @@ module.exports = {
     },
     /**
      * Busca usuarios usando un criterio.
-     * @param criterio con el que hacemos las busquedas de las bids
+     * @param criterio con el que hacemos las busquedas de las usuarios
      * @param funcionCallback
      */
     getUsers: function (criterio, funcionCallback) {
@@ -16,7 +16,7 @@ module.exports = {
                 console.log(err);
                 funcionCallback(null);
             } else {
-                var collection = db.collection('users');
+                let collection = db.collection('users');
                 collection.find(criterio).toArray(function (err, usuarios) {
                     if (err) {
                         funcionCallback(null);
@@ -38,7 +38,7 @@ module.exports = {
             if (err) {
                 funcionCallback(null);
             } else {
-                var collection = db.collection('users');
+                let collection = db.collection('users');
                 collection.find(usuario).toArray(function (err, usuarios) {
                     if (usuarios.length == 0) {
                         collection.insert(usuario, function (err, result) {
@@ -53,6 +53,28 @@ module.exports = {
                         funcionCallback(null);
                     }
 
+                });
+            }
+        });
+    },
+    /**
+     * Borramos usuarios por criterio ID.
+     * @param criterio con el que hacemos el borrado de los usuarios
+     * @param funcionCallback
+     */
+    deleteUser: function (criterio, funcionCallback) {
+        this.mongo.MongoClient.connect(this.app.get('db'), function (err, db) {
+            if (err) {
+                funcionCallback(null);
+            } else {
+                let collection = db.collection('users');
+                collection.remove({'_id':{'$in':criterio}}, function (err, result) {
+                    if (err) {
+                        funcionCallback(null);
+                    } else {
+                        funcionCallback(result);
+                    }
+                    db.close();
                 });
             }
         });

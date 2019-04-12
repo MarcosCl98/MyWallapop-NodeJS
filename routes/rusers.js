@@ -1,4 +1,4 @@
-module.exports = function (app, swig, usersRepository,) {
+module.exports = function (app, swig, usersRepository) {
     //Lista de usuarios
     app.get("/user/list", function (req, res) {
         usersRepository.getUsers({}, function (users) {
@@ -14,34 +14,36 @@ module.exports = function (app, swig, usersRepository,) {
         })
     });
 
+    //Borrar lista usuarios
+    app.post("/user/delete", function (req, res) {
+        let listUserID = req.body.listUserID;
+        listUserID = listUserID.split(',');
+        let listUserObjectID = new Array();
+        listUserID.forEach(function(element) {
+            console.log(element);
+            listUserObjectID.push(usersRepository.mongo.ObjectID(element));
+        });
+
+        if(listUserID.length > 0) { //Si se manda algun parametro actuar.
+            usersRepository.deleteUser(listUserObjectID, function (users) {
+                if (users == null) {
+                    res.send("No hay ningun usuario.");
+                } else {
+                    res.redirect("/user/list");
+                }
+            })
+        } else { //Si no se manda ningun parametro
+            res.redirect("/user/list");
+        }
+    });
+
+    //Registrarse get
     app.get("/signup", function (req, res) {
         var respuesta = swig.renderFile('views/users/signup.html', {});
         res.send(respuesta);
     });
 
-    app.get("/login", function (req, res) {
-        var respuesta = swig.renderFile('views/users/login.html', {});
-        res.send(respuesta);
-    });
-
-    app.post("/login", function (req, res) {
-        var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
-            .update(req.body.password).digest('hex');
-        var criterio = {
-            email: req.body.username,
-            password: seguro
-        }
-        usersRepository.getUsers(criterio, function (usuarios) {
-            if (usuarios == null || usuarios.length == 0) {
-                req.session.usuario = null;
-                res.redirect("/login" + "?mensaje=Email o password incorrecto" + "&tipoMensaje=alert-danger ");
-            } else {
-                req.session.usuario = usuarios[0].email;
-                res.redirect("/");
-            }
-        });
-    });
-
+    //Registrarse post
     app.post('/signup', function (req, res) {
         //Validaciones
         if(req.body.email.length <=0){
@@ -87,5 +89,30 @@ module.exports = function (app, swig, usersRepository,) {
                 });
             }
         }
-    })
+    });
+
+    //Loguearse get
+    app.get("/login", function (req, res) {
+        var respuesta = swig.renderFile('views/users/login.html', {});
+        res.send(respuesta);
+    });
+
+    //Loguearse post
+    app.post("/login", function (req, res) {
+        var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
+            .update(req.body.password).digest('hex');
+        var criterio = {
+            email: req.body.username,
+            password: seguro
+        }
+        usersRepository.getUsers(criterio, function (usuarios) {
+            if (usuarios == null || usuarios.length == 0) {
+                req.session.usuario = null;
+                res.redirect("/login" + "?mensaje=Email o password incorrecto" + "&tipoMensaje=alert-danger ");
+            } else {
+                req.session.usuario = usuarios[0].email;
+                res.redirect("/");
+            }
+        });
+    });
 }
