@@ -52,8 +52,8 @@
         </thead>
         <tbody>
         {% for user in users %}
-        <tr>
-        <!-- if {{session.email}} == {{user.email}} -->
+            <tr>
+            <!-- if {{session.email}} == {{user.email}} -->
             <td><input type="checkbox" id='{{ user._id.toString() }}'></td>
             <!--% else %
                 <td><input type="checkbox" id='{{ user.id }}' disabled></input></td>
@@ -63,7 +63,7 @@
             <td></td>
             <td>{{user.nombre}}</td>
             <td>{{user.apellido}}</td>
-        </tr>
+            </tr>
         {% endfor %}
         </tbody>
     </table>

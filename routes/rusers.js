@@ -20,7 +20,6 @@ module.exports = function (app, swig, usersRepository) {
         listUserID = listUserID.split(',');
         let listUserObjectID = new Array();
         listUserID.forEach(function(element) {
-            console.log(element);
             listUserObjectID.push(usersRepository.mongo.ObjectID(element));
         });
 
