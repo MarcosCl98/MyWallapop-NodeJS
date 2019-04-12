@@ -43,18 +43,49 @@ module.exports = function (app, swig, usersRepository,) {
     });
 
     app.post('/signup', function (req, res) {
-        var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
-            .update(req.body.password).digest('hex');
-        var usuario = {
-            email: req.body.email,
-            password: seguro
+        //Validaciones
+        if(req.body.email.length <=0){
+            console.log('nombre');
+            res.redirect("/signup?mensaje=Error, campo email vacío")
         }
-        usersRepository.insertUser(usuario, function (id) {
-            if (id == null) {
-                res.redirect("/signup?mensaje=Error al registrar usuario")
-            } else {
-                res.send('Usuario Insertado ' + id);
+        else if(req.body.nombre.length <=0){
+            console.log('nombre1');
+            res.redirect("/signup?mensaje=Error, campo nombre vacío")
+        }
+        else if(req.body.apellido.length <=0){
+            console.log('nombre2');
+            res.redirect("/signup?mensaje=Error, campo apellido vacío")
+        }
+        else if(req.body.password.length <=0){
+            res.redirect("/signup?mensaje=Error, campo contraseña vacío")
+        }
+        else if(req.body.password2.length <=0){
+            res.redirect("/signup?mensaje=Error, campo contraseña vacío");
+        }else {
+            var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
+                .update(req.body.password).digest('hex');
+            var seguro2 = app.get("crypto").createHmac('sha256', app.get('clave'))
+                .update(req.body.password2).digest('hex');
+            if(seguro != seguro2) {
+                console.log('nombre3');
+                res.redirect("/signup?mensaje=Error, las contraseñas no coinciden")
+            }else {
+                var usuario = {
+                    email: req.body.email,
+                    nombre: req.body.nombre,
+                    apellido: req.body.apellido,
+                    password: seguro
+                }
+
+                usersRepository.insertUser(usuario, function (id) {
+                    if (id == null) {
+                        res.redirect("/signup?mensaje=Error al registrar usuario, email ya existente")
+                    } else {
+                        req.session.usuario = usuario.email;
+                        res.redirect("/?mensaje=Has iniciado sesión correctamente.");
+                    }
+                });
             }
-        });
+        }
     })
 }

@@ -38,6 +38,19 @@ usersRepository.init(app, mongo);
 require("./routes/rusers.js")(app, swig, usersRepository); // (app, param1, param2, etc.)
 require("./routes/rtienda.js")(app, swig); // (app, param1, param2, etc.)
 
+// routerUsuarioSession
+var routerUsuarioSession = express.Router();
+routerUsuarioSession.use(function (req, res, next) {
+    console.log("routerUsuarioSession");
+    if (req.session.usuario) {
+        // dejamos correr la petición
+        next();
+    } else {
+        console.log("va a : " + req.session.destino)
+        res.redirect("/login");
+    }
+});
+
 // lanzar el servidor
 app.listen(app.get('port'), function() {
     console.log("Servidor activo en http://localhost:8081");

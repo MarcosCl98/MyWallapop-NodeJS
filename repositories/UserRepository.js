@@ -16,7 +16,7 @@ module.exports = {
                 console.log(err);
                 funcionCallback(null);
             } else {
-                var collection = db.collection('users');
+                var collection = db.collection('mywallapop/users');
                 collection.find(criterio).toArray(function (err, usuarios) {
                     if (err) {
                         funcionCallback(null);
@@ -38,14 +38,21 @@ module.exports = {
             if (err) {
                 funcionCallback(null);
             } else {
-                var collection = db.collection('usuarios');
-                collection.insert(usuario, function (err, result) {
-                    if (err) {
-                        funcionCallback(null);
+                var collection = db.collection('mywallapop/users');
+                collection.find(usuario).toArray(function (err, usuarios) {
+                    if (usuarios.length == 0) {
+                        collection.insert(usuario, function (err, result) {
+                            if (err) {
+                                funcionCallback(null);
+                            } else {
+                                funcionCallback(result.ops[0]._id);
+                            }
+                            db.close();
+                        });
                     } else {
-                        funcionCallback(result.ops[0]._id);
+                        funcionCallback(null);
                     }
-                    db.close();
+
                 });
             }
         });
