@@ -17,7 +17,7 @@ app.use(express.static('public'));
 
 // Variables
 app.set('port', 8081);
-app.set('db', 'mongodb://admin:sdi@mywallapop-shard-00-00-cjxyq.mongodb.net:27017,mywallapop-shard-00-01-cjxyq.mongodb.net:27017,mywallapop-shard-00-02-cjxyq.mongodb.net:27017/test?ssl=true&replicaSet=MyWallapop-shard-0&authSource=admin&retryWrites=true');
+app.set('db', 'mongodb://admin:sdi@mywallapop-shard-00-00-cjxyq.mongodb.net:27017,mywallapop-shard-00-01-cjxyq.mongodb.net:27017,mywallapop-shard-00-02-cjxyq.mongodb.net:27017/mywallapop?ssl=true&replicaSet=MyWallapop-shard-0&authSource=admin&retryWrites=true');
 app.set('clave', 'abcdefg');
 app.set('crypto', crypto);
 
@@ -36,7 +36,6 @@ usersRepository.init(app, mongo);
 
 //Rutas/controladores por lógica
 require("./routes/rusers.js")(app, swig, usersRepository); // (app, param1, param2, etc.)
-require("./routes/rtienda.js")(app, swig); // (app, param1, param2, etc.)
 
 // routerUsuarioSession
 var routerUsuarioSession = express.Router();

@@ -16,7 +16,7 @@ module.exports = {
                 console.log(err);
                 funcionCallback(null);
             } else {
-                var collection = db.collection('mywallapop/users');
+                var collection = db.collection('users');
                 collection.find(criterio).toArray(function (err, usuarios) {
                     if (err) {
                         funcionCallback(null);
@@ -38,7 +38,7 @@ module.exports = {
             if (err) {
                 funcionCallback(null);
             } else {
-                var collection = db.collection('mywallapop/users');
+                var collection = db.collection('users');
                 collection.find(usuario).toArray(function (err, usuarios) {
                     if (usuarios.length == 0) {
                         collection.insert(usuario, function (err, result) {
