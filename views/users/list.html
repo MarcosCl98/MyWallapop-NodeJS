@@ -1,4 +1,4 @@
-{% extends "../base/base.html" %}
+{% extends "../base.html" %}
 {% block contenido_principal %}
 <h2 th:text="#{list.users}"></h2>
 <p th:text="#{list.p2}"></p>
@@ -37,16 +37,16 @@
         </thead>
         <tbody>
         {% for user in users %}
-            <!-- if {{session.email}} == {{user.email}} -->
-                <td><input type="checkbox" id='{{ user.id }}'></input></td>
-            <!--% else %
-                <td><input type="checkbox" id='{{ user.id }}' disabled></input></td>
-            % endif %-->
-            <td>{{user.id}}</td>
-            <td>{{user.email}}</td>
-            <td></td>
-            <td>{{user.name}}</td>
-            <td>{{user.lastname}}</td>
+        <!-- if {{session.email}} == {{user.email}} -->
+        <td><input type="checkbox" id='{{ user._id }}'></input></td>
+        <!--% else %
+            <td><input type="checkbox" id='{{ user.id }}' disabled></input></td>
+        % endif %-->
+        <td>{{user._id}}</td>
+        <td>{{user.email}}</td>
+        <td></td>
+        <td>{{user.nombre}}</td>
+        <td>{{user.apellido}}</td>
         {% endfor %}
         </tr>
         </tbody>
