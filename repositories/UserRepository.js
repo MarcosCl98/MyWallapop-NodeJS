@@ -62,13 +62,13 @@ module.exports = {
      * @param criterio con el que hacemos el borrado de los usuarios
      * @param funcionCallback
      */
-    deleteUser: function (criterio, funcionCallback) {
+    deleteUser: function (criterio, funcionCallback, userEmail) {
         this.mongo.MongoClient.connect(this.app.get('db'), function (err, db) {
             if (err) {
                 funcionCallback(null);
             } else {
                 let collection = db.collection('users');
-                collection.remove({'_id':{'$in':criterio}}, function (err, result) {
+                collection.remove({$and: [{'_id':{'$in':criterio}}, {email: {$ne: userEmail}}]}, function (err, result) {
                     if (err) {
                         funcionCallback(null);
                     } else {

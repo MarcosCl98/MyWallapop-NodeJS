@@ -53,11 +53,11 @@
         <tbody>
         {% for user in users %}
             <tr>
-            <!-- if {{session.email}} == {{user.email}} -->
-            <td><input type="checkbox" id='{{ user._id.toString() }}'></td>
-            <!--% else %
-                <td><input type="checkbox" id='{{ user.id }}' disabled></input></td>
-            % endif %-->
+            {% if session.usuario !== user.email %}
+                <td><input type="checkbox" id='{{ user._id.toString() }}'></td>
+            {% else %}
+                <td><input type="checkbox" id='{{ user._id.toString() }}' disabled></td>
+            {% endif %}
             <td>{{user._id.toString()}}</td>
             <td>{{user.email}}</td>
             <td></td>

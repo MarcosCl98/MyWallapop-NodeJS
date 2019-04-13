@@ -7,7 +7,8 @@ module.exports = function (app, swig, usersRepository) {
             } else {
                 var respuesta = swig.renderFile('views/users/list.html',
                     {
-                        users: users
+                        users: users,
+                        session: req.session
                     });
                 res.send(respuesta);
             }
@@ -30,7 +31,7 @@ module.exports = function (app, swig, usersRepository) {
                 } else {
                     res.redirect("/user/list");
                 }
-            })
+            }, req.session.usuario)
         } else { //Si no se manda ningun parametro
             res.redirect("/user/list");
         }
