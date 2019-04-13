@@ -5,6 +5,8 @@ const app = express();
 const mongo = require('mongodb');
 const swig = require('swig');
 
+const favicon = require('serve-favicon'); //Para el favicon
+
 //Encriptacion de passwords
 const crypto = require('crypto');
 
@@ -31,14 +33,14 @@ app.use(expressSession({
 // routerUsuarioSession
 var routerUsuarioSession = express.Router();
 routerUsuarioSession.use(function (req, res, next) {
-    console.log("routerUsuarioSession");
     if (req.session.usuario) {
-        // dejamos correr la petición
         next();
     } else {
         res.redirect("/login");
     }
 });
+app.use("/user*", routerUsuarioSession);
+app.use("/bid*", routerUsuarioSession);
 
 // routerAdministrador: Tienes que ser administrador para hacer ciertas cosas.
 var routerAdminSession = express.Router();
@@ -55,14 +57,19 @@ app.use("/user*", routerAdminSession);
 //Inicializado de repositorios
 const usersRepository = require('./repositories/UserRepository');
 usersRepository.init(app, mongo);
+const bidsRepository = require('./repositories/BidRepository');
+bidsRepository.init(app, mongo);
 
 //Carpeta publica
 app.use(express.static('public'));
 
 //Rutas/controladores por lógica
-require("./routes/rusers.js")(app, swig, usersRepository); // (app, param1, param2, etc.)
+require("./routes/rusers.js")(app, swig, usersRepository); // Router usuarios
+require("./routes/rbids.js")(app, swig, bidsRepository); // Router bids
 require("./routes/rforbidden.js")(app, swig); //Pagina que carga que esta prohibido el acceso.
 
+//Poner el favicon
+app.use(favicon(__dirname + '/public/img/favicon.ico'));
 // lanzar el servidor
 app.listen(app.get('port'), function() {
     console.log("Servidor activo en http://localhost:8081");
