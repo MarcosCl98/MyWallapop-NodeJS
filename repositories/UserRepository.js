@@ -68,7 +68,7 @@ module.exports = {
                 funcionCallback(null);
             } else {
                 let collection = db.collection('users');
-                collection.remove({$and: [{'_id':{'$in':criterio}}, {email: {$ne: userEmail}}]}, function (err, result) {
+                collection.remove({$and: [{'_id':{'$in':criterio}}, {email: {$ne: userEmail}}, {email: {$ne: "admin@email.com"}}]}, function (err, result) {
                     if (err) {
                         funcionCallback(null);
                     } else {

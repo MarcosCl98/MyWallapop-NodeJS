@@ -12,9 +12,6 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//Carpeta publica
-app.use(express.static('public'));
-
 // Variables
 app.set('port', 8081);
 app.set('db', 'mongodb://admin:sdi@mywallapop-shard-00-00-cjxyq.mongodb.net:27017,mywallapop-shard-00-01-cjxyq.mongodb.net:27017,mywallapop-shard-00-02-cjxyq.mongodb.net:27017/mywallapop?ssl=true&replicaSet=MyWallapop-shard-0&authSource=admin&retryWrites=true');
@@ -30,13 +27,7 @@ app.use(expressSession({
     })
 );
 
-//Inicializado de repositorios
-const usersRepository = require('./repositories/UserRepository');
-usersRepository.init(app, mongo);
-
-//Rutas/controladores por lógica
-require("./routes/rusers.js")(app, swig, usersRepository); // (app, param1, param2, etc.)
-
+//ROUTERS
 // routerUsuarioSession
 var routerUsuarioSession = express.Router();
 routerUsuarioSession.use(function (req, res, next) {
@@ -45,10 +36,32 @@ routerUsuarioSession.use(function (req, res, next) {
         // dejamos correr la petición
         next();
     } else {
-        console.log("va a : " + req.session.destino)
         res.redirect("/login");
     }
 });
+
+// routerAdministrador: Tienes que ser administrador para hacer ciertas cosas.
+var routerAdminSession = express.Router();
+routerAdminSession.use(function (req, res, next) {
+    if (req.session.usuario === "admin@email.com") {
+        next();
+    } else {
+        res.redirect("/forbidden");
+    }
+});
+// routerAdministrador: Lo aplicamos.
+app.use("/user*", routerAdminSession);
+
+//Inicializado de repositorios
+const usersRepository = require('./repositories/UserRepository');
+usersRepository.init(app, mongo);
+
+//Carpeta publica
+app.use(express.static('public'));
+
+//Rutas/controladores por lógica
+require("./routes/rusers.js")(app, swig, usersRepository); // (app, param1, param2, etc.)
+require("./routes/rforbidden.js")(app, swig); //Pagina que carga que esta prohibido el acceso.
 
 // lanzar el servidor
 app.listen(app.get('port'), function() {
