@@ -11,7 +11,7 @@ module.exports = function (app, swig, bidsRepository) {
     app.post("/bid/add", function (req, res) {
         //TODO HACER CHECK
         //Mirar si los parametros son validos.
-        let bid = new Bid(req.body.title, req.body.description, req.body.price, req.session.usuario);
+        let bid = new Bid(req.body.title, req.body.description, req.body.price, req.session.usuario, req.body.isSpecial);
         console.log(bid);
         bidsRepository.addBid(bid, function (id) {
             console.log(id);
