@@ -50,5 +50,28 @@ module.exports = {
                 });
             }
         });
+    },
+    /**
+     * Actualizamos una bid.
+     * @param criterio
+     * @param bid
+     * @param funcionCallback
+     */
+    updateBid: function (criterio, bid, funcionCallback) {
+        this.mongo.MongoClient.connect(this.app.get('db'), function (err, db) {
+            if (err) {
+                funcionCallback(null);
+            } else {
+                var collection = db.collection('bids');
+                collection.update(criterio, {$set: bid}, function (err, result) {
+                    if (err) {
+                        funcionCallback(null);
+                    } else {
+                        funcionCallback(result);
+                    }
+                    db.close();
+                });
+            }
+        });
     }
 };

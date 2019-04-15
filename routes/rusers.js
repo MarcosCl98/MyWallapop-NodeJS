@@ -63,7 +63,7 @@ module.exports = function (app, swig, usersRepository) {
         }
         else if(req.body.password2.length <=0){
             res.redirect("/signup?mensaje=Error, campo contraseña vacío");
-        }else {
+        } else {
             var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
                 .update(req.body.password).digest('hex');
             var seguro2 = app.get("crypto").createHmac('sha256', app.get('clave'))
@@ -78,7 +78,7 @@ module.exports = function (app, swig, usersRepository) {
                     nombre: req.body.nombre,
                     apellido: req.body.apellido,
                     password: seguro,
-                    money: 100
+                    money: 100.00
                 }
 
                 usersRepository.insertUser(usuario, function (id) {

@@ -44,7 +44,7 @@
                 <td>
                     <button id="boton" type="submit" class="btn btn-default"
 
-                            style="background-color: #C24641; color: white">NO HAGO NADA, deberia de destacar si se puede creo
+                            style="background-color: #C24641; color: white">NO HAGO NADA, creo este es el de borrar
                     </button>
                 </td>
                 {% if bid.isSpecial === 'on' %}
@@ -63,15 +63,18 @@
                         </button>
                     </td>
                     <td></td>
-                    <!--<td th:if="${bid.status == T(com.uniovi.entities.BidStatus).ACTIVED}">
-                        <form id="outstandingButton" th:action="${'/bid/mybids/oustanding/' + bid.id}">
-                            <button type="submit" class="btn btn-default"
-                                    th:text=#{bid.list.destacar}></button>
+                    {% if bid.buyerEmail === null %}
+                    <td>
+                        <form id="outstandingButton" action="/bid/mybids/oustanding" method="post">
+                            <input type="hidden" id="id" name="id" value="{{bid._id.toString()}}">
+                            <button type="submit" class="btn btn-default">
+                                Destacar (20€)
+                            </button>
                         </form>
                     </td>
-                    <td th:unless="${bid.status == T(com.uniovi.entities.BidStatus).ACTIVED}">
-                    </td>
-                    -->
+                    {% else %}
+                        <td></td>
+                    {% endif %}
                 </div>
                 {% endif %}
             </tr>

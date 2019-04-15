@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block contenido_principal %}
+<div class="container">
+    <h2>Bienvenido a la aplicacion MyWallapop</h2>
+    <p>Desarrollada en NodeJS por Martin y Marcos para la asignatura de SDI.</p>
+    <p>Usa la NAVBAR para navegar por la web.</p>
+
+    <h2>Ofertas destacadas</h2>
+    <p>Ofertas destacadas por los usuarios.</p>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>Titulo</th>
+                <th>Descripcion</th>
+                <th>Precio</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for bid in bids %}
+                <tr id="ofertas">
+                    <td>{{bid.title}}</td>
+                    <td>{{bid.description}}</td>
+                    <td>{{bid.price}} €</td>
+                    <td><button class="btn btn-primary">Comprar, implementalo feno cuando comprar</button></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
