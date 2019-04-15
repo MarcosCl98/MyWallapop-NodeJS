@@ -47,4 +47,17 @@ module.exports = function (app, swig, bidsRepository) {
             res.send(respuesta);
         })
     });
+
+
+    //Listado de mis ofertas compradas
+    app.get("/bid/mybuyedbids", function (req, res) {
+        bidsRepository.getBids({buyerEmail : req.session.usuario}, function (bids) {
+            let respuesta = swig.renderFile('views/bids/mybuyedbids.html',
+                {
+                    bids: bids,
+                    session: req.session
+                });
+            res.send(respuesta);
+        })
+    });
 }
