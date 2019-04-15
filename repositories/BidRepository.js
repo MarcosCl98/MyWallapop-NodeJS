@@ -6,27 +6,24 @@ module.exports = {
         this.app = app;
     },
     /**
-     * Todas las bids con paginacion.
+     * Busqueda de bids.
      * @param criterio con el que hacemos las busquedas de las bids
-     * @param pg
      * @param funcionCallback
      */
-    getBids: function (criterio, pg, funcionCallback) {
+    getBids: function (criterio, funcionCallback) {
         this.mongo.MongoClient.connect(this.app.get('db'), function (err, db) {
             if (err) {
+                console.log(err);
                 funcionCallback(null);
             } else {
-                var collection = db.collection('bids');
-                collection.count(function (err, count) {
-                    collection.find(criterio).skip((pg - 1) * 4).limit(4)
-                        .toArray(function (err, canciones) {
-                            if (err) {
-                                funcionCallback(null);
-                            } else {
-                                funcionCallback(canciones, count);
-                            }
-                            db.close();
-                        });
+                let collection = db.collection('bids');
+                collection.find(criterio).toArray(function (err, bids) {
+                    if (err) {
+                        funcionCallback(null);
+                    } else {
+                        funcionCallback(bids);
+                    }
+                    db.close();
                 });
             }
         });
