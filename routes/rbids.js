@@ -28,9 +28,10 @@ module.exports = function (app, swig, bidsRepository) {
                 console.log(id);
                 if (id == null) {
                     res.redirect("/bid/add?mensaje=Error al intentar agregar una oferta." +
-                        "&tipoMensaje=alert-danger ");
+                        "&tipoMensaje=alert-danger");
                 } else {
-                    res.redirect("/bid/mybids?mensaje=Oferta registrada correctamente.");
+                    res.redirect("/bid/mybids?mensaje=Oferta registrada correctamente." +
+                        "&tipoMensaje=alert-success");
                 }
             });
         }
