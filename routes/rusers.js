@@ -5,7 +5,7 @@ module.exports = function (app, swig, usersRepository) {
             if (users == null) {
                 res.send("No hay ningun usuario.");
             } else {
-                var respuesta = swig.renderFile('views/users/list.html',
+                let respuesta = swig.renderFile('views/users/list.html',
                     {
                         users: users,
                         session: req.session
