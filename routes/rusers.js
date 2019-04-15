@@ -29,6 +29,8 @@ module.exports = function (app, swig, usersRepository) {
                 if (users == null) {
                     res.send("No hay ningun usuario.");
                 } else {
+                    //TODO: borrar bids de las cuales es creador
+                    //TODO: borrar conversaciones en las que participa
                     res.redirect("/user/list");
                 }
             }, req.session.usuario)
