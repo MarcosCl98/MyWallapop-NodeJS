@@ -70,21 +70,24 @@ module.exports = function (app, swig, usersRepository) {
                 .update(req.body.password2).digest('hex');
             if(seguro != seguro2) {
                 console.log('nombre3');
-                res.redirect("/signup?mensaje=Error, las contraseñas no coinciden")
+                res.redirect("/signup?mensaje=Error, las contraseñas no coinciden." +
+                    "&tipoMensaje=alert-danger");
             }else {
                 var usuario = {
                     email: req.body.email,
                     nombre: req.body.nombre,
                     apellido: req.body.apellido,
-                    password: seguro
+                    password: seguro,
+                    money: 100
                 }
 
                 usersRepository.insertUser(usuario, function (id) {
                     if (id == null) {
-                        res.redirect("/signup?mensaje=Error al registrar usuario, email ya existente")
-                    } else {
+                        res.redirect("/signup?mensaje=Error al registrar usuario, email ya existente." +
+                            "&tipoMensaje=alert-danger");
                         req.session.usuario = usuario.email;
-                        res.redirect("/?mensaje=Has iniciado sesión correctamente.");
+                        res.redirect("/?mensaje=Has iniciado sesión correctamente." +
+                            "&tipoMensaje=alert-succes");
                     }
                 });
             }
@@ -108,7 +111,7 @@ module.exports = function (app, swig, usersRepository) {
         usersRepository.getUsers(criterio, function (usuarios) {
             if (usuarios == null || usuarios.length == 0) {
                 req.session.usuario = null;
-                res.redirect("/login" + "?mensaje=Email o password incorrecto" + "&tipoMensaje=alert-danger ");
+                res.redirect("/login" + "?mensaje=Email o password incorrecto." + "&tipoMensaje=alert-danger");
             } else {
                 req.session.usuario = usuarios[0].email;
                 res.redirect("/");
