@@ -65,7 +65,7 @@ app.use(express.static('public'));
 
 //Rutas/controladores por lógica
 require("./routes/rhome.js")(app, swig, bidsRepository);
-require("./routes/rusers.js")(app, swig, usersRepository); // Router usuarios
+require("./routes/rusers.js")(app, swig, usersRepository, bidsRepository); // Router usuarios
 require("./routes/rbids.js")(app, swig, bidsRepository, usersRepository); // Router bids
 require("./routes/rforbidden.js")(app, swig); //Pagina que carga que esta prohibido el acceso.
 

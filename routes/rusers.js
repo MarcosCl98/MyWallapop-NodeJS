@@ -1,4 +1,4 @@
-module.exports = function (app, swig, usersRepository) {
+module.exports = function (app, swig, usersRepository, bidsRepository) {
     //Lista de usuarios
     app.get("/user/list", function (req, res) {
         usersRepository.getUsers({}, function (users) {
@@ -20,16 +20,27 @@ module.exports = function (app, swig, usersRepository) {
         let listUserID = req.body.listUserID;
         listUserID = listUserID.split(',');
         let listUserObjectID = new Array();
-        listUserID.forEach(function(element) {
+        listUserID.forEach(function (element) {
             listUserObjectID.push(usersRepository.mongo.ObjectID(element));
         });
 
-        if(listUserID.length > 0) { //Si se manda algun parametro actuar.
+        if (listUserID.length > 0) { //Si se manda algun parametro actuar.
             usersRepository.deleteUser(listUserObjectID, function (users) {
                 if (users == null) {
                     res.send("No hay ningun usuario.");
                 } else {
                     //TODO: borrar bids de las cuales es creador
+                    usersRepository.getUsers(listUserObjectID, function (usersInList) {
+                        let listUserEmail = new Array();
+                        listUserEmail.forEach(function (element) {
+                            listUserEmail.push(element.email);
+                        });
+                        bidsRepository.removeBidByUserEmail(usersInList, function (resultRemove) {
+                            if (resultRemove == null) {
+                                res.redirect("/user/list");
+                            }
+                        });
+                    });
                     //TODO: borrar conversaciones en las que participa
                     res.redirect("/user/list");
                 }
@@ -48,33 +59,29 @@ module.exports = function (app, swig, usersRepository) {
     //Registrarse post
     app.post('/signup', function (req, res) {
         //Validaciones
-        if(req.body.email.length <=0){
+        if (req.body.email.length <= 0) {
             console.log('nombre');
             res.redirect("/signup?mensaje=Error, campo email vacío")
-        }
-        else if(req.body.nombre.length <=0){
+        } else if (req.body.nombre.length <= 0) {
             console.log('nombre1');
             res.redirect("/signup?mensaje=Error, campo nombre vacío")
-        }
-        else if(req.body.apellido.length <=0){
+        } else if (req.body.apellido.length <= 0) {
             console.log('nombre2');
             res.redirect("/signup?mensaje=Error, campo apellido vacío")
-        }
-        else if(req.body.password.length <=0){
+        } else if (req.body.password.length <= 0) {
             res.redirect("/signup?mensaje=Error, campo contraseña vacío")
-        }
-        else if(req.body.password2.length <=0){
+        } else if (req.body.password2.length <= 0) {
             res.redirect("/signup?mensaje=Error, campo contraseña vacío");
         } else {
             var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
                 .update(req.body.password).digest('hex');
             var seguro2 = app.get("crypto").createHmac('sha256', app.get('clave'))
                 .update(req.body.password2).digest('hex');
-            if(seguro != seguro2) {
+            if (seguro != seguro2) {
                 console.log('nombre3');
                 res.redirect("/signup?mensaje=Error, las contraseñas no coinciden." +
                     "&tipoMensaje=alert-danger");
-            }else {
+            } else {
                 var usuario = {
                     email: req.body.email,
                     nombre: req.body.nombre,
@@ -88,6 +95,7 @@ module.exports = function (app, swig, usersRepository) {
                         res.redirect("/signup?mensaje=Error al registrar usuario, email ya existente." +
                             "&tipoMensaje=alert-danger");
                         req.session.usuario = usuario.email;
+                    } else {
                         res.redirect("/?mensaje=Has iniciado sesión correctamente." +
                             "&tipoMensaje=alert-succes");
                     }
