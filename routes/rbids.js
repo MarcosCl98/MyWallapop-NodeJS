@@ -25,7 +25,6 @@ module.exports = function (app, swig, bidsRepository) {
         } else {
             let bid = new Bid(req.body.title, req.body.description, req.body.price, req.session.usuario, req.body.specialBid);
             bidsRepository.addBid(bid, function (id) {
-                console.log(id);
                 if (id == null) {
                     res.redirect("/bid/add?mensaje=Error al intentar agregar una oferta." +
                         "&tipoMensaje=alert-danger");
