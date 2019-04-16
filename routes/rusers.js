@@ -127,6 +127,7 @@ module.exports = function (app, swig, usersRepository, bidsRepository, conversat
                     req.session.usuario = null;
                     res.redirect("/login" + "?mensaje=Email o password incorrecto." + "&tipoMensaje=alert-danger");
                 } else {
+                    req.session.money = usuarios[0].money+ "€";
                     req.session.usuario = usuarios[0].email;
                     res.redirect("/");
                 }

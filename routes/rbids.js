@@ -3,7 +3,7 @@ const Bid = require('../model/Bid');
 module.exports = function (app, swig, bidsRepository, userRepository) {
     //Añadir una nueva oferta
     app.get("/bid/add", function (req, res) {
-        let respuesta = swig.renderFile('views/bids/add.html',{
+        let respuesta = swig.renderFile('views/bids/add.html', {
             session: req.session
         });
         res.send(respuesta);
@@ -69,7 +69,7 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
 
     //Listado de ofertas propias.
     app.get("/bid/mybids", function (req, res) {
-        bidsRepository.getBids({userEmail : req.session.usuario}, function (bids) {
+        bidsRepository.getBids({userEmail: req.session.usuario}, function (bids) {
             let respuesta = swig.renderFile('views/bids/mybids.html',
                 {
                     bids: bids,
@@ -82,7 +82,7 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
 
     //Listado de mis ofertas compradas
     app.get("/bid/mybuyedbids", function (req, res) {
-        bidsRepository.getBids({buyerEmail : req.session.usuario}, function (bids) {
+        bidsRepository.getBids({buyerEmail: req.session.usuario}, function (bids) {
             let respuesta = swig.renderFile('views/bids/mybuyedbids.html',
                 {
                     bids: bids,
@@ -96,11 +96,11 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
         //chequear si tiene dinero
         userRepository.getUsers({email: req.session.usuario}, function (users) {
             let user = users[0];
-            if(user.money == null || user.money < 20.0) {
+            if (user.money == null || user.money < 20.0) {
                 res.redirect("/bid/mybids?mensaje=No tienes 20€ o mas para poder destacar la oferta." +
                     "&tipoMensaje=alert-danger");
             } else {
-                bidsRepository.getBids({_id : bidsRepository.mongo.ObjectID(req.body.id)}, function (bids) {
+                bidsRepository.getBids({_id: bidsRepository.mongo.ObjectID(req.body.id)}, function (bids) {
                     let bid = bids[0];
                     if (bid.buyerEmail != null) {
                         res.redirect("/bid/mybids?mensaje=Esa oferta no se puede destacar por que ya fue vendida." +
@@ -111,14 +111,14 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
                     } else {
                         //restar dinero y destacar oferta
                         user.money -= 20;
-                        userRepository.updateUser({email: req.session.usuario}, user,function (result1) {
-                            if(result1 == null) {
+                        userRepository.updateUser({email: req.session.usuario}, user, function (result1) {
+                            if (result1 == null) {
                                 res.redirect("/bid/mybids?mensaje=Ocurrio un error al restar dinero y no se completo la transaccion." +
                                     "&tipoMensaje=alert-danger");
                             } else {
                                 bid.isSpecial = 'on';
                                 bidsRepository.updateBid({_id: bidsRepository.mongo.ObjectID(req.body.id)}, bid, function (result2) {
-                                    if(result2 == null) {
+                                    if (result2 == null) {
                                         res.redirect("/bid/mybids?mensaje=Ocurrio un error al actualizar la oferta y no se completo la transaccion." +
                                             "&tipoMensaje=alert-danger");
                                     } else {
@@ -133,6 +133,32 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
             }
         });
     })
+
+    app.post('/bid/mybids/delete/:id', function (req, res) {
+        var criterio = {"_id": bidsRepository.mongo.ObjectID(req.params.id)};
+        bidsRepository.removeBid(criterio, function (canciones) {
+            if (canciones == null) {
+            } else {
+                res.redirect("/bid/mybids?mensaje=Oferta borrada correctamente." + "&tipoMensaje=alert-success");
+            }
+        });
+    })
+
+    //Listado de ofertas propias.
+    app.get("/bid/list", function (req, res) {
+        var criterio = {};
+        if (req.query.busqueda != null) {
+            criterio = {"title": {$regex : ".*"+req.query.busqueda+".*",$options: 'i'}};
+        }
+        bidsRepository.getBids(criterio, function (bids) {
+            let respuesta = swig.renderFile('views/bids/list.html',
+                {
+                    bids: bids,
+                    session: req.session
+                });
+            res.send(respuesta);
+        })
+    });
 
 
 }
