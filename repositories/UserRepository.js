@@ -38,8 +38,12 @@ module.exports = {
             if (err) {
                 funcionCallback(null);
             } else {
+                var criterio = {
+                    email: usuario.email
+                }
+                console.log(criterio);
                 let collection = db.collection('users');
-                collection.find(usuario).toArray(function (err, usuarios) {
+                collection.find(criterio).toArray(function (err, usuarios) {
                     if (usuarios.length == 0) {
                         collection.insert(usuario, function (err, result) {
                             if (err) {

@@ -31,23 +31,26 @@
             <a href="/"> <img src="/img/Logo.png" alt="logo"/>
             </a>
         </div>
-        <div class="collapse navbar-collapse navbar-expand-lg navbar-dark fixed-top" id="myNavbar"
-             th:object="${user}">
+        <div class="collapse navbar-collapse navbar-expand-lg navbar-dark fixed-top" id="myNavbar">
             <ul class="nav navbar-nav">
 
                 <li><a href="/" style="color: black"> <i
                         class="glyphicon glyphicon-home"></i> <span>Inicio</span>
                 </a></li>
+                {% if session.usuario == 'admin@email.com' %}
                 <li id="users-menu" class="dropdown"><a
                         class="dropdown-toggle" data-toggle="dropdown" href="#"
                         style="color: black"> <i class="glyphicon glyphicon-user"></i>
                     <span>Usuarios</span><span class="caret"></span>
                 </a>
                     <ul class="dropdown-menu">
+
                         <li><a href="/user/list"
                                style="color: black">Lista usuarios</a></li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if session.usuario != null %}
                 <li id="bids-menu" class="dropdown"><a
                         class="dropdown-toggle" data-toggle="dropdown" href="#"
                         style="color: black"> <i class="glyphicon glyphicon-lock">
@@ -57,23 +60,50 @@
                         <li><a
                                 href="/bid/add">Agregar una oferta</a></li>
                         <li><a href="/bid/list"
-                                                                    >Lista de ofertas</a></li>
+                        >Lista de ofertas</a></li>
                         <li><a
                                 href="/bid/mybids">Mis ofertas</a></li>
                         <li><a
                                 href="/bid/mybuyedbids">Mis ofertas compradas</a></li>
                     </ul>
                 </li>
+                {% endif %}
             </ul>
+
             <ul class="nav navbar-nav navbar-right">
-                <li ><a href="/signup"
-                                                          style="color: black"><span
+
+                {% if session.usuario == null%}
+                <li><a href="/signup"
+                       style="color: black"><span
                         class="glyphicon glyphicon-user"></span>
                     Registrarse</a></li>
-                <li ><a href="/login"
-                                                          style="color: black"><span
+                <li><a href="/login"
+                       style="color: black"><span
                         class="glyphicon glyphicon-log-in"></span>
                     Iniciar sesion</a></li>
+                {% endif %}
+                {% if session.usuario != null%}
+                <li id="user-menu"
+                    class="dropdown"><a class="dropdown-toggle"
+                                        data-toggle="dropdown" role="button" aria-haspopup="true"
+                                        aria-expanded="false" href="#" style="color: black"> <span
+                ></span> {{session.usuario}}<span class="caret"></span>
+                </a>
+                    <ul class="dropdown-menu">
+                        <li style="text-align: center; font-size: 16pt" id="DropDownInfo2"><a>Saldo disponible</a></li>
+                        <li style="text-align: center; font-size: 16pt" id="DropDownInfo"><a>{{session.money}}</a></li>
+                        <li><a
+                                href="/conversation"
+                                style="color: black; text-align: center; font-weight: bold">
+                            <i class="glyphicon glyphicon-envelope"></i> <span>Conversaciones</span>
+                        </a></li>
+                        <li><a href="/logout" style="color: red; font-size: 18; text-align: center; font-weight: bold">
+                            <i class="glyphicon glyphicon-log-out"></i> <span
+                        >Desconectarse</span>
+                        </a></li>
+                    </ul>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </div>
