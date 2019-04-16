@@ -12,7 +12,7 @@ const crypto = require('crypto');
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({extended: true}));
 
 // Variables
 app.set('port', 8081);
@@ -54,6 +54,22 @@ routerAdminSession.use(function (req, res, next) {
 // routerAdministrador: Lo aplicamos.
 app.use("/user*", routerAdminSession);
 
+routerUsuarioAutor
+var routerUsuarioAutor = express.Router();
+routerUsuarioAutor.use(function (req, res, next) {
+    var path = require('path');
+    var id = path.basename(req.originalUrl); // Cuidado porque req.params no funciona // en el router si los params van en la URL.
+    bidsRepository.getBids({"_id": mongo.ObjectID(id)}, function (canciones) {
+        if (canciones[0].userEmail == req.session.usuario) {
+            next();
+        } else {
+            res.redirect("/l");
+        }
+    })
+});
+//Aplicar routerUsuarioAutor
+app.use("/bid/mybids/delete",routerUsuarioAutor);
+
 //Inicializado de repositorios
 const usersRepository = require('./repositories/UserRepository');
 usersRepository.init(app, mongo);
@@ -72,6 +88,6 @@ require("./routes/rforbidden.js")(app, swig); //Pagina que carga que esta prohib
 //Poner el favicon
 app.use(favicon(__dirname + '/public/img/favicon.ico'));
 // lanzar el servidor
-app.listen(app.get('port'), function() {
+app.listen(app.get('port'), function () {
     console.log("Servidor activo en http://localhost:8081");
 })

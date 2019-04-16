@@ -134,5 +134,15 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
         });
     })
 
+    app.post('/bid/mybids/delete/:id', function (req, res) {
+        var criterio = {"_id": bidsRepository.mongo.ObjectID(req.params.id)};
+        bidsRepository.removeBid(criterio, function (canciones) {
+            if (canciones == null) {
+            } else {
+                res.redirect("/bid/mybids?mensaje=Oferta borrada correctamente." + "&tipoMensaje=alert-success");
+            }
+        });
+    })
+
 
 }
