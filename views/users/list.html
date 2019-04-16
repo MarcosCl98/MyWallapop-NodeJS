@@ -12,7 +12,7 @@
         let totalUsersToDelete = 0;
         for (let r = 1, n = table.rows.length; r < n; r++) {
             // Parse id users
-            let id = table.rows[r].cells[1].innerHTML;
+            let id = table.rows[r].cells[2].innerHTML;
             //If checkbox is mark, added to list
             if (document.getElementById(id).checked) {
                 listIds[totalUsersToDelete] = id;
@@ -54,9 +54,9 @@
         {% for user in users %}
             <tr>
             {% if session.usuario !== user.email %}
-                <td><input type="checkbox" id='{{ user._id.toString() }}'></td>
+                <td><input type="checkbox" id='{{ user.email }}'></td>
             {% else %}
-                <td><input type="checkbox" id='{{ user._id.toString() }}' disabled></td>
+                <td><input type="checkbox" id='{{ user.email }}' disabled></td>
             {% endif %}
             <td>{{user._id.toString()}}</td>
             <td>{{user.email}}</td>

@@ -79,7 +79,7 @@ module.exports = {
      * @param criterio
      * @param funcionCallback
      */
-    removeBidByUserEmail: function (criterio, funcionCallback) {
+    removeBidByEmail: function (criterio, funcionCallback) {
         this.mongo.MongoClient.connect(this.app.get('db'), function (err, db) {
             if (err) {
                 funcionCallback(null);
