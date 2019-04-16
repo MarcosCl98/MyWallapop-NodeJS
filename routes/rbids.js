@@ -3,7 +3,9 @@ const Bid = require('../model/Bid');
 module.exports = function (app, swig, bidsRepository, userRepository) {
     //Añadir una nueva oferta
     app.get("/bid/add", function (req, res) {
-        let respuesta = swig.renderFile('views/bids/add.html');
+        let respuesta = swig.renderFile('views/bids/add.html',{
+            session: req.session
+        });
         res.send(respuesta);
     });
 

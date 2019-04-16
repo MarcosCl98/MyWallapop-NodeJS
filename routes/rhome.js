@@ -9,7 +9,8 @@ module.exports = function (app, swig, bidsRepository) {
         bidsRepository.getBids({isSpecial : 'on'}, function (bids) {
             let respuesta = swig.renderFile('views/index.html',
                 {
-                    bids: bids
+                    bids: bids,
+                    session: req.session
                 });
             res.send(respuesta);
         })
