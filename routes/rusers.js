@@ -1,4 +1,4 @@
-module.exports = function (app, swig, usersRepository, bidsRepository) {
+module.exports = function (app, swig, usersRepository, bidsRepository, conversationRepository) {
     //Lista de usuarios
     app.get("/user/list", function (req, res) {
         usersRepository.getUsers({}, function (users) {
@@ -22,9 +22,10 @@ module.exports = function (app, swig, usersRepository, bidsRepository) {
 
         if (listUserEmail.length > 0) { //Si se manda algun parametro actuar.
             usersRepository.deleteUser({$and: [{email: {'$in': listUserEmail}}, {email: {$ne: req.session.usuario}}, {email: {$ne: "admin@email.com"}}]}, function (users) {
-                bidsRepository.removeBid({'userEmail': {'$in': listUserEmail}}, function (resultRemove) {
-                    //TODO: borrar conversaciones en las que participa
-                    res.redirect("/user/list");
+                bidsRepository.removeBid({userEmail: {'$in': listUserEmail}}, function (resultRemove) {
+                    conversationRepository.removeConversation({participants: {'$in': listUserEmail}}, function(resultConversation) {
+                        res.redirect("/user/list");
+                    });
                 });
             });
         } else { //Si no se manda ningun parametro

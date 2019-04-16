@@ -59,13 +59,15 @@ const usersRepository = require('./repositories/UserRepository');
 usersRepository.init(app, mongo);
 const bidsRepository = require('./repositories/BidRepository');
 bidsRepository.init(app, mongo);
+const conversationRepository = require('./repositories/ConversationRepository');
+conversationRepository.init(app, mongo);
 
 //Carpeta publica
 app.use(express.static('public'));
 
 //Rutas/controladores por lógica
 require("./routes/rhome.js")(app, swig, bidsRepository);
-require("./routes/rusers.js")(app, swig, usersRepository, bidsRepository); // Router usuarios
+require("./routes/rusers.js")(app, swig, usersRepository, bidsRepository, conversationRepository); // Router usuarios
 require("./routes/rbids.js")(app, swig, bidsRepository, usersRepository); // Router bids
 require("./routes/rforbidden.js")(app, swig); //Pagina que carga que esta prohibido el acceso.
 
