@@ -58,12 +58,12 @@ routerUsuarioAutor
 var routerUsuarioAutor = express.Router();
 routerUsuarioAutor.use(function (req, res, next) {
     var path = require('path');
-    var id = path.basename(req.originalUrl); // Cuidado porque req.params no funciona // en el router si los params van en la URL.
-    bidsRepository.getBids({"_id": mongo.ObjectID(id)}, function (canciones) {
-        if (canciones[0].userEmail == req.session.usuario) {
+    var id = path.basename(req.originalUrl);
+    bidsRepository.getBids({"_id": mongo.ObjectID(id)}, function (bids) {
+        if (bids[0].userEmail == req.session.usuario) {
             next();
         } else {
-            res.redirect("/l");
+            res.redirect("/");
         }
     })
 });
