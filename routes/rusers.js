@@ -1,4 +1,4 @@
-module.exports = function (app, swig, usersRepository, bidsRepository) {
+module.exports = function (app, swig, usersRepository, bidsRepository, conversationRepository) {
     //Lista de usuarios
     app.get("/user/list", function (req, res) {
         usersRepository.getUsers({}, function (users) {
@@ -17,40 +17,23 @@ module.exports = function (app, swig, usersRepository, bidsRepository) {
 
     //Borrar lista usuarios
     app.post("/user/delete", function (req, res) {
-        let listUserID = req.body.listUserID;
-        listUserID = listUserID.split(',');
-        let listUserObjectID = new Array();
-        listUserID.forEach(function (element) {
-            listUserObjectID.push(usersRepository.mongo.ObjectID(element));
-        });
+        let listUserEmail = req.body.listUserID;
+        listUserEmail = listUserEmail.split(',');
 
-        if (listUserID.length > 0) { //Si se manda algun parametro actuar.
-            usersRepository.deleteUser(listUserObjectID, function (users) {
-                if (users == null) {
-                    res.send("No hay ningun usuario.");
-                } else {
-                    //TODO: borrar bids de las cuales es creador
-                    usersRepository.getUsers(listUserObjectID, function (usersInList) {
-                        let listUserEmail = new Array();
-                        listUserEmail.forEach(function (element) {
-                            listUserEmail.push(element.email);
-                        });
-                        bidsRepository.removeBidByUserEmail(usersInList, function (resultRemove) {
-                            if (resultRemove == null) {
-                                res.redirect("/user/list");
-                            }
-                        });
+        if (listUserEmail.length > 0) { //Si se manda algun parametro actuar.
+            usersRepository.deleteUser({$and: [{email: {'$in': listUserEmail}}, {email: {$ne: req.session.usuario}}, {email: {$ne: "admin@email.com"}}]}, function (users) {
+                bidsRepository.removeBid({userEmail: {'$in': listUserEmail}}, function (resultRemove) {
+                    conversationRepository.removeConversation({participants: {'$in': listUserEmail}}, function(resultConversation) {
+                        res.redirect("/user/list");
                     });
-                    //TODO: borrar conversaciones en las que participa
-                    res.redirect("/user/list");
-                }
-            }, req.session.usuario)
+                });
+            });
         } else { //Si no se manda ningun parametro
             res.redirect("/user/list");
         }
     });
 
-    //Registrarse get
+//Registrarse get
     app.get("/signup", function (req, res) {
         var respuesta = swig.renderFile('views/users/signup.html', {
             session: req.session
@@ -58,26 +41,23 @@ module.exports = function (app, swig, usersRepository, bidsRepository) {
         res.send(respuesta);
     });
 
-    //Registrarse post
+//Registrarse post
     app.post('/signup', function (req, res) {
         //Validaciones
         if (req.body.email.length <= 0) {
-            console.log('nombre');
-            res.redirect("/signup?mensaje=Error, campo email vacío."+
+            res.redirect("/signup?mensaje=Error, campo email vacío." +
                 "&tipoMensaje=alert-danger")
         } else if (req.body.nombre.length <= 0) {
-            console.log('nombre1');
-            res.redirect("/signup?mensaje=Error, campo nombre vacío."+
+            res.redirect("/signup?mensaje=Error, campo nombre vacío." +
                 "&tipoMensaje=alert-danger")
         } else if (req.body.apellido.length <= 0) {
-            console.log('nombre2');
-            res.redirect("/signup?mensaje=Error, campo apellido vacío."+
+            res.redirect("/signup?mensaje=Error, campo apellido vacío." +
                 "&tipoMensaje=alert-danger")
         } else if (req.body.password.length <= 0) {
-            res.redirect("/signup?mensaje=Error, campo contraseña vacío."+
+            res.redirect("/signup?mensaje=Error, campo contraseña vacío." +
                 "&tipoMensaje=alert-danger")
         } else if (req.body.password2.length <= 0) {
-            res.redirect("/signup?mensaje=Error, campo contraseña vacío."+
+            res.redirect("/signup?mensaje=Error, campo contraseña vacío." +
                 "&tipoMensaje=alert-danger");
         } else {
             var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
@@ -85,7 +65,6 @@ module.exports = function (app, swig, usersRepository, bidsRepository) {
             var seguro2 = app.get("crypto").createHmac('sha256', app.get('clave'))
                 .update(req.body.password2).digest('hex');
             if (seguro != seguro2) {
-                console.log('nombre3');
                 res.redirect("/signup?mensaje=Error, las contraseñas no coinciden." +
                     "&tipoMensaje=alert-danger");
             } else {
@@ -120,7 +99,7 @@ module.exports = function (app, swig, usersRepository, bidsRepository) {
             "&tipoMensaje=alert-success");
     })
 
-    //Loguearse get
+//Loguearse get
     app.get("/login", function (req, res) {
         var respuesta = swig.renderFile('views/users/login.html', {
             session: req.session
@@ -128,16 +107,15 @@ module.exports = function (app, swig, usersRepository, bidsRepository) {
         res.send(respuesta);
     });
 
-    //Loguearse post
+//Loguearse post
     app.post("/login", function (req, res) {
         if (req.body.username.length <= 0) {
-            console.log('nombre');
             res.redirect("/login?mensaje=Error, campo email vacío." +
                 "&tipoMensaje=alert-danger")
-        }else if (req.body.password.length <= 0) {
-            res.redirect("/login?mensaje=Error, campo contraseña vacío."+
+        } else if (req.body.password.length <= 0) {
+            res.redirect("/login?mensaje=Error, campo contraseña vacío." +
                 "&tipoMensaje=alert-danger")
-        }else{
+        } else {
             var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
                 .update(req.body.password).digest('hex');
             var criterio = {
