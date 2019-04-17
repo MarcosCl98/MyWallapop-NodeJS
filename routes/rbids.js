@@ -122,6 +122,7 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
                                         res.redirect("/bid/mybids?mensaje=Ocurrio un error al actualizar la oferta y no se completo la transaccion." +
                                             "&tipoMensaje=alert-danger");
                                     } else {
+                                        req.session.money = user.money - 20;
                                         res.redirect("/bid/mybids?mensaje=Oferta descada correctamente." +
                                             "&tipoMensaje=alert-success");
                                     }

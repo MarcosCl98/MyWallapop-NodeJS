@@ -66,6 +66,11 @@ module.exports = {
      * @param criterio con el que hacemos el borrado de los usuarios
      * @param funcionCallback
      */
+    /**
+     * Borramos usuarios por criterio ID.
+     * @param criterio con el que hacemos el borrado de los usuarios
+     * @param funcionCallback
+     */
     deleteUser: function (criterio, funcionCallback) {
         this.mongo.MongoClient.connect(this.app.get('db'), function (err, db) {
             if (err) {

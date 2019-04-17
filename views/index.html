@@ -23,7 +23,40 @@
                     <td>{{bid.title}}</td>
                     <td>{{bid.description}}</td>
                     <td>{{bid.price}} €</td>
-                    <td><button class="btn btn-primary">Comprar, implementalo feno cuando comprar</button></td>
+                    <td>{% if bid.buyerEmail == null %}
+                        {% if bid.userEmail != session.usuario %}
+                        <div>
+                            <form method="post" action="/bid/list/buyed/{{ bid._id.toString() }}">
+                                <button type="submit" class="btn btn-default"
+                                        style="background-color: #3CD951; color: white"
+                                        enabled>Comprar</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        {% if bid.buyerEmail != null %}
+                        <div>
+                            <form id="botonSold" >
+                                <button type="submit" class="btn btn-default"
+                                        style="background-color: #3CD951; color: white"
+                                        disabled>Vendido</button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if bid.userEmail == session.usuario %}
+                        <div>
+                            <div >
+                                <form id="botonBuy2" >
+                                    <button type="submit" class="btn btn-default"
+                                            style="background-color: #3CD951; color: white"
+                                    >Destacar</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

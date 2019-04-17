@@ -25,14 +25,12 @@
             let form = document.createElement("form");
             form.setAttribute("method", "post");
             form.setAttribute("action", urlUpdate);
-
             //Pasamos el parametro que queremos poner.
             let hiddenField = document.createElement("input");
             hiddenField.setAttribute("type", "hidden");
             hiddenField.setAttribute("name", "listUserID");
             hiddenField.setAttribute("value", listIds);
             form.appendChild(hiddenField);
-
             document.body.appendChild(form);
             form.submit();
         }
@@ -52,18 +50,18 @@
         </thead>
         <tbody>
         {% for user in users %}
-            <tr>
+        <tr>
             {% if session.usuario !== user.email %}
-                <td><input type="checkbox" id='{{ user.email }}'></td>
+            <td><input type="checkbox" id='{{ user.email }}'></td>
             {% else %}
-                <td><input type="checkbox" id='{{ user.email }}' disabled></td>
+            <td><input type="checkbox" id='{{ user.email }}' disabled></td>
             {% endif %}
             <td>{{user._id.toString()}}</td>
             <td>{{user.email}}</td>
             <td></td>
             <td>{{user.nombre}}</td>
             <td>{{user.apellido}}</td>
-            </tr>
+        </tr>
         {% endfor %}
         </tbody>
     </table>
