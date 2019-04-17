@@ -27,7 +27,7 @@
                        <th>Precio</th>
                        <th class="col-md-1"></th>
                        <th class="col-md-1"></th>
-                       <th class="col-md-1"></th>
+                       <th class="col-md-1">Tipo</th>
                    </tr>
                </thead>
                <tbody>
@@ -61,6 +61,7 @@
 					   </td>
 					   <td>
 						   {% if bid.userEmail == session.usuario %}
+						   {% if bid.isSpecial === 'off' %}
                            <div>
 							   <div >
                                    <form id="botonBuy2" >
@@ -71,7 +72,21 @@
                                </div>
                            </div>
 						   {% endif %}
+						   {% endif %}
 					   </td>
+					   {% if bid.isSpecial === 'on' %}
+					   <td>
+						   <button class="btn btn-default" style="background-color: yellow;
+								color: black">Especial
+						   </button>
+					   </td>
+					   {% else %}
+					   <td>
+						   <button class="btn btn-default" style="background-color: white;
+								color: black">Normal
+						   </button>
+					   </td>
+					   {% endif %}
                    </tr>
 				   {% endfor %}
                </tbody>

@@ -31,6 +31,7 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
                     res.redirect("/bid/add?mensaje=No tienes 20€ o mas para poder destacar la oferta." +
                         "&tipoMensaje=alert-danger");
                 } else {
+                    var finalMoney = parseFloat(user.money)-20;
                     user.money -= 20;
                     userRepository.updateUser({email: req.session.usuario}, user, function (result1) {
                         if (result1 == null) {
@@ -43,7 +44,7 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
                                     res.redirect("/bid/add?mensaje=Error al intentar agregar una oferta." +
                                         "&tipoMensaje=alert-danger");
                                 } else {
-
+                                    req.session.money = finalMoney;
                                     res.redirect("/bid/mybids?mensaje=Oferta registrada correctamente." +
                                         "&tipoMensaje=alert-success");
                                 }
@@ -59,7 +60,6 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
                     res.redirect("/bid/add?mensaje=Error al intentar agregar una oferta." +
                         "&tipoMensaje=alert-danger");
                 } else {
-
                     res.redirect("/bid/mybids?mensaje=Oferta registrada correctamente." +
                         "&tipoMensaje=alert-success");
                 }
@@ -110,6 +110,7 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
                             "&tipoMensaje=alert-danger");
                     } else {
                         //restar dinero y destacar oferta
+                        var finalMoney = parseFloat(user.money)-20;
                         user.money -= 20;
                         userRepository.updateUser({email: req.session.usuario}, user, function (result1) {
                             if (result1 == null) {
@@ -122,7 +123,7 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
                                         res.redirect("/bid/mybids?mensaje=Ocurrio un error al actualizar la oferta y no se completo la transaccion." +
                                             "&tipoMensaje=alert-danger");
                                     } else {
-                                        req.session.money = user.money - 20;
+                                        req.session.money = finalMoney;
                                         res.redirect("/bid/mybids?mensaje=Oferta descada correctamente." +
                                             "&tipoMensaje=alert-success");
                                     }
