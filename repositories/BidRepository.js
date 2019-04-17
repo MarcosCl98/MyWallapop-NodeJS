@@ -79,23 +79,6 @@ module.exports = {
      * @param criterio
      * @param funcionCallback
      */
-    removeBidByEmail: function (criterio, funcionCallback) {
-        this.mongo.MongoClient.connect(this.app.get('db'), function (err, db) {
-            if (err) {
-                funcionCallback(null);
-            } else {
-                var collection = db.collection('bids');
-                collection.remove({'userEmail': {'$in': criterio}}, function (err, result) {
-                    if (err) {
-                        funcionCallback(null);
-                    } else {
-                        funcionCallback(result);
-                    }
-                    db.close();
-                });
-            }
-        });
-    },
     removeBid: function (criterio, funcionCallback) {
         this.mongo.MongoClient.connect(this.app.get('db'), function (err, db) {
             if (err) {
