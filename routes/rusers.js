@@ -103,7 +103,7 @@ module.exports = function (app, swig, usersRepository, bidsRepository) {
                             "&tipoMensaje=alert-danger");
                     } else {
                         req.session.usuario = usuario.email;
-                        req.session.money = usuario.money + "€";
+                        req.session.money = usuario.money;
                         res.redirect("/home?mensaje=Has iniciado sesión correctamente." +
                             "&tipoMensaje=alert-success");
 
@@ -149,7 +149,7 @@ module.exports = function (app, swig, usersRepository, bidsRepository) {
                     req.session.usuario = null;
                     res.redirect("/login" + "?mensaje=Email o password incorrecto." + "&tipoMensaje=alert-danger");
                 } else {
-                    req.session.money = usuarios[0].money+ "€";
+                    req.session.money = usuarios[0].money;
                     req.session.usuario = usuarios[0].email;
                     res.redirect("/");
                 }

@@ -142,13 +142,13 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
                 res.redirect("/bid/mybids?mensaje=Oferta borrada correctamente." + "&tipoMensaje=alert-success");
             }
         });
-    })
+    });
 
     //Listado de ofertas propias.
     app.get("/bid/list", function (req, res) {
         var criterio = {};
         if (req.query.busqueda != null) {
-            criterio = {"title": {$regex : ".*"+req.query.busqueda+".*",$options: 'i'}};
+            criterio = {"title": {$regex: ".*" + req.query.busqueda + ".*", $options: 'i'}};
         }
         bidsRepository.getBids(criterio, function (bids) {
             let respuesta = swig.renderFile('views/bids/list.html',
@@ -160,5 +160,30 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
         })
     });
 
+    app.post('/bid/list/buyed/:id', function (req, res) {
+        var criterio = {"_id": bidsRepository.mongo.ObjectID(req.params.id)};
+        bidsRepository.getBids(criterio, function (bids) {
+            var money = req.session.money - bids[0].price;
+            if (money < 0) {
+                res.redirect("/bid/list?mensaje=No tienes dinero suficiente." + "&tipoMensaje=alert-danger");
+            } else {
+                var criterio = {"_id": bidsRepository.mongo.ObjectID(req.params.id)};
+                var documento = {"buyerEmail": req.session.usuario};
+                bidsRepository.updateBid(criterio, documento, function (bids) {
+                });
+                bidsRepository.getBids(criterio, function (bids) {
+                    var criterioUsuario = {"email": req.session.usuario};
+                    var documentoUsuario = {"money": parseFloat(money)};
+                    userRepository.updateUser(criterioUsuario, documentoUsuario, function (users) {
+                        req.session.money = money;
+                        res.redirect("/bid/list?mensaje=Oferta comprada correctamente." + "&tipoMensaje=alert-success");
+                    });
+                });
+
+            }
+
+        });
+        }
+    )
 
 }
