@@ -124,7 +124,7 @@ require("./routes/rhome.js")(app, swig, bidsRepository);
 require("./routes/rusers.js")(app, swig, usersRepository, bidsRepository, conversationRepository); // Router usuarios
 require("./routes/rbids.js")(app, swig, bidsRepository, usersRepository); // Router bids
 require("./routes/rforbidden.js")(app, swig); //Pagina que carga que esta prohibido el acceso.
-require("./routes/rapiapp.js")(app, bidsRepository, usersRepository); //Pagina que carga que esta prohibido el acceso.
+require("./routes/rapiapp.js")(app, bidsRepository, usersRepository, conversationRepository); //Pagina que carga que esta prohibido el acceso.
 
 //Poner el favicon
 app.use(favicon(__dirname + '/public/img/favicon.ico'));
