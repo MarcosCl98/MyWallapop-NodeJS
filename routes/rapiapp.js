@@ -3,9 +3,9 @@ module.exports = function (app, bidsRepository, usersRepository) {
     app.get("/api/bid/notmybids", function (req, res) {
         let token = req.headers['token'] || req.body.token || req.query.token;
         let decoded = app.get('jwt').verify(token, 'secreto');
-        let userEmail = decoded.usuario;
+        let loginUserEmail = decoded.usuario;
         //TODO: Ahora que aqui se busquen todas menos las del mail que se pasa.
-        bidsRepository.getBids({userEmail: {$not: "prueba3@gmail.com"}}, function (bids) {
+        bidsRepository.getBids({userEmail: {$ne: loginUserEmail}}, function (bids) {
             if (bids == null) {
                 res.status(500);
                 res.json({
