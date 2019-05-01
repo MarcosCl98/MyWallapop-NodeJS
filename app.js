@@ -2,6 +2,9 @@
 const express = require('express');
 const app = express();
 
+const jwt = require('jsonwebtoken');
+app.set('jwt',jwt);
+
 const mongo = require('mongodb');
 const swig = require('swig');
 
@@ -30,6 +33,41 @@ app.use(expressSession({
 );
 
 //ROUTERS
+// routerUsuarioToken
+var routerUsuarioToken = express.Router();
+routerUsuarioToken.use(function(req, res, next) {
+    // obtener el token, vía headers (opcionalmente GET y/o POST).
+    var token = req.headers['token'] || req.body.token || req.query.token;
+    if (token != null) {// verificar el token
+        jwt.verify(token, 'secreto', function(err, infoToken) {
+            if (err || (Date.now()/1000 - infoToken.tiempo) > 240 ){
+                res.status(403); // Forbidden
+                res.json({
+                    acceso : false,
+                    error: 'Token invalido o caducado'
+                });
+                // También podríamos comprobar que intoToken.usuario existe
+                return;
+
+            } else {
+                // dejamos correr la petición
+                res.usuario = infoToken.usuario;
+                next();
+            }
+        });
+
+    } else {
+        res.status(403); // Forbidden
+        res.json({
+            acceso : false,
+            mensaje: 'No hay Token'
+        });
+    }
+});
+// Aplicar routerUsuarioToken
+app.use('/api/conversation', routerUsuarioToken);
+app.use('/api/bid', routerUsuarioToken);
+
 // routerUsuarioSession
 var routerUsuarioSession = express.Router();
 routerUsuarioSession.use(function (req, res, next) {
@@ -86,6 +124,7 @@ require("./routes/rhome.js")(app, swig, bidsRepository);
 require("./routes/rusers.js")(app, swig, usersRepository, bidsRepository, conversationRepository); // Router usuarios
 require("./routes/rbids.js")(app, swig, bidsRepository, usersRepository); // Router bids
 require("./routes/rforbidden.js")(app, swig); //Pagina que carga que esta prohibido el acceso.
+require("./routes/rapiapp.js")(app, bidsRepository, usersRepository); //Pagina que carga que esta prohibido el acceso.
 
 //Poner el favicon
 app.use(favicon(__dirname + '/public/img/favicon.ico'));
