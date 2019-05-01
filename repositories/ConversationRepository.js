@@ -73,5 +73,28 @@ module.exports = {
                 });
             }
         });
+    },
+    /**
+     * Actualizamos una conversatin.
+     * @param criterio
+     * @param bid
+     * @param funcionCallback
+     */
+    updateConversation: function (criterio, bid, funcionCallback) {
+        this.mongo.MongoClient.connect(this.app.get('db'), function (err, db) {
+            if (err) {
+                funcionCallback(null);
+            } else {
+                var collection = db.collection('conversations');
+                collection.update(criterio, {$set: bid}, function (err, result) {
+                    if (err) {
+                        funcionCallback(null);
+                    } else {
+                        funcionCallback(result);
+                    }
+                    db.close();
+                });
+            }
+        });
     }
 };

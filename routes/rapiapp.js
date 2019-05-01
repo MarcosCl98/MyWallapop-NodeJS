@@ -23,13 +23,13 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
 
 
     /**
-     * Enviar un mensaje.
-     * Cuando se nos pasa un conversationId la converascion ya existe, si no se pasa no existe.
-     * Necesita que lleve el token en el header.
-     * Se debera de enviar por un formulario:
-     *      - bidId : id de la oferta por la cual se quiere chatear.
-     *      - message : mensaje el cual se quiere mandar.
-     *      - conversationId : id de conversacion, si no se pasa damos por hecho que la hay que crear.
+     * Enviar un mensaje, dos metodos disponibles en funcion de los paremetros que se pasen.
+     * Si queremos crear una nueva conversacion deberemos de pasar lo siguiente:
+     *      - idBid : id de la oferta a la cual queremos ofertar
+     *      - message: mensaje el cual queremos mandar
+     * Si queremos mandar un mensaje a una conversacion existente deberemos pasar lo siguiente:
+     *      - idConversation: id de la conversacion a la cual queremos mandar el mensaje
+     *      - message: contenido del mensaje que queremos enviar
      * El autor se obtendra a traves del header.
      */
     app.post("/api/bid/sendmessage", function (req, res) {
@@ -39,19 +39,14 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
         let message = req.body.message; //Mensaje que se pasa a traves de un formulario.
         let conversationId = req.body.conversationId; //Id de la conversacion, no tiene por que tener si es nueva.
 
-        //TODO: Borrar estas lineas, eso solo debug
-        console.log("Debug:");
-        console.log(bidId);
-        console.log(message);
-
         //Chequeamos que los dos atributos obligatorios no estan vacios.
-        if(bidId == undefined) {
+        if (bidId == undefined && conversationId == undefined) {
             res.status(200);
             res.json({
-                error: "Se tiene que pasar un atributo bidId."
+                error: "Tienes que pasar uno de los dos atributos, o bidId o conversationId."
             });
         }
-        else if(message == undefined) {
+        if (message == undefined) {
             res.status(200);
             res.json({
                 error: "Se tiene que pasar un atributo message."
@@ -63,14 +58,14 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
 
             //Revisar que se mande un mensaje a su propia oferta, si es asi enviar error
             //En principio aunque la oferta ya este vendida se podra enviar mensajes tambien.
-            bidsRepository.getBids({_id: bidsRepository.mongo.ObjectID(bidId)}, function (bid) {
-                if (bid == null || bid.length == 0) { //Si no se paso la oferta es que no existe
-                    res.status(200);
-                    res.json({
-                        error: "Esa bid sobre la que quieres enviar el mensaje no existe."
-                    });
-                } else { //Como existe el producto vamos a revisar.
-                    if (conversationId == undefined) { //Si no se pasa id de conversacion es nueva y deberemos de crearla.
+            if (conversationId == undefined) {
+                bidsRepository.getBids({_id: bidsRepository.mongo.ObjectID(bidId)}, function (bid) {
+                    if (bid == null || bid.length == 0) { //Si no se paso la oferta es que no existe
+                        res.status(200);
+                        res.json({
+                            error: "Esa bid sobre la que quieres enviar el mensaje no existe."
+                        });
+                    } else { //Como existe el producto vamos a revisar.
                         if (bid[0].userEmail == loginUserEmail) { //No se puede enviar un mensaje de creacion mismo.
                             res.status(400); //Como se prohibe enviamos codigo 401 que es de Forbbiden
                             res.json({
@@ -103,11 +98,10 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                                     error: "Esa bid sobre la que quieres enviar el mensaje no existe."
                                                 });
                                             } else {
-                                                res.status(200);
-                                                res.json(JSON.stringify({
-                                                    mensaje: "Mensaje enviado correctamente",
-                                                    "conversation": conversation
-                                                }));
+                                                res.status(201); //Mensjae enviado correctamente.
+                                                res.json({
+                                                    error: "Conversacion creada y nuevo mensaje enviado."
+                                                });
                                             }
                                         })
                                     } else { //La conversacion ya existe, damos error ya que nos deberian de haber pasado id.
@@ -119,52 +113,88 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                     }
                                 });
                         }
-                    } else { //Se nos pasa id por lo que existe
-                        //Primero si existe la conversacion, si no existe deberemos devolver error de que nos pasa un id.
-                        //Verificamos que los usuarios pertenecen a la covnersacion o son los propietariuos de la oferta.
                     }
-                }
-            });
-            //Chequeamos si la conversacion ya existe, si no existe creamos una nueva
-
-            //Chequeamos si la conversacion ya existe, si es asi añadimos el mensaje a la nueva
-
-            //Devolver si se pudo enviar el nuevo mensaje o no
-        }
-    });
-
-    /**
-     * Metodo post para autetificar.
-     * Hay que mandar un formulario con:
-     *      email: email del usuario
-     *      password: password de la cuenta
-     * Este te devolvera un token necesario para acceder a todos los demas metodos.
-     */
-    app.post("/api/autenticar/", function (req, res) {
-        let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
-            .update(req.body.password).digest('hex');
-        let criterio = {
-            email: req.body.email,
-            password: seguro
-        }
-
-        usersRepository.getUsers(criterio, function (usuarios) {
-            if (usuarios == null || usuarios.length == 0) {
-                res.status(401); // Unauthorized
-                res.json({
-                    autenticado: false
-                })
-            } else {
-                let token = app.get('jwt').sign(
-                    {usuario: criterio.email, tiempo: Date.now() / 1000},
-                    "secreto");
-                res.status(200);
-                res.json({
-                    autenticado: true,
-                    token: token
-                })
+                });
+            } else { //Se nos pasa id por lo que existe
+                conversationRepository.getConversations(
+                    {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                    function (conversations) {
+                        if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
+                            res.status(500); //Error de servidor
+                            res.json({
+                                error: "Esa conversacion a la que quieres enviar un mensaje no existe."
+                            });
+                        } else {
+                            let conversation = conversations[0]; //Guardamos la conversacion
+                            //Ahora vamos a chequear si la covnersacion son propietarios
+                            if (conversation.bidOwner == loginUserEmail ||
+                                conversation.bidInterested == loginUserEmail) {
+                                conversation.messages.push([
+                                    loginUserEmail, //usuario que manda el mensaje
+                                    new Date(), //fecha de envio
+                                    message, //Contenido
+                                    false //No ha sido leido por defecto
+                                ]);
+                                conversationRepository.updateConversation(
+                                    {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                                    conversation,
+                                    function (conversation) {
+                                        if (conversation == null) {
+                                            res.status(500); //Error de servidor
+                                            res.json({
+                                                error: "Ha ocurrido un servidor al intentar enviar el mensaje."
+                                            });
+                                        } else {
+                                            res.status(201); //Mensjae enviado correctamente.
+                                            res.json({
+                                                error: "Nuevo mensaje enviado."
+                                            });
+                                        }
+                                    });
+                            } else { //Esa conversacion no es tuya
+                                res.status(500); //Error de servidor
+                                res.json({
+                                    error: "Esa conversacion a la que intentas mandar un mensaje no es tuya."
+                                });
+                            }
+                        }
+                    });
             }
-
-        });
+        }
     });
+
+/**
+ * Metodo post para autetificar.
+ * Hay que mandar un formulario con:
+ *      email: email del usuario
+ *      password: password de la cuenta
+ * Este te devolvera un token necesario para acceder a todos los demas metodos.
+ */
+app.post("/api/autenticar/", function (req, res) {
+    let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
+        .update(req.body.password).digest('hex');
+    let criterio = {
+        email: req.body.email,
+        password: seguro
+    }
+
+    usersRepository.getUsers(criterio, function (usuarios) {
+        if (usuarios == null || usuarios.length == 0) {
+            res.status(401); // Unauthorized
+            res.json({
+                autenticado: false
+            })
+        } else {
+            let token = app.get('jwt').sign(
+                {usuario: criterio.email, tiempo: Date.now() / 1000},
+                "secreto");
+            res.status(200);
+            res.json({
+                autenticado: true,
+                token: token
+            })
+        }
+
+    });
+});
 }
