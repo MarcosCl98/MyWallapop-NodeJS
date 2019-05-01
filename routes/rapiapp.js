@@ -115,7 +115,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                         }
                     }
                 });
-            } else { //Se nos pasa id por lo que existe
+            } else { //Se nos pasa id, pero no de la bid, por lo que damos por hecho que ya existe.
                 conversationRepository.getConversations(
                     {_id: conversationRepository.mongo.ObjectID(conversationId)},
                     function (conversations) {

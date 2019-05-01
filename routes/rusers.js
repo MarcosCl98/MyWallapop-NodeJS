@@ -21,9 +21,11 @@ module.exports = function (app, swig, usersRepository, bidsRepository, conversat
         listUserEmail = listUserEmail.split(',');
 
         if (listUserEmail.length > 0) { //Si se manda algun parametro actuar.
-            usersRepository.deleteUser({$and: [{email: {'$in': listUserEmail}}, {email: {$ne: req.session.usuario}}, {email: {$ne: "admin@email.com"}}]}, function (users) {
+            usersRepository.deleteUser({$and: [{email: {'$in': listUserEmail}},
+                    {email: {$ne: req.session.usuario}}, {email: {$ne: "admin@email.com"}}]}, function (users) {
                 bidsRepository.removeBid({userEmail: {'$in': listUserEmail}}, function (resultRemove) {
-                    conversationRepository.removeConversation({participants: {'$in': listUserEmail}}, function(resultConversation) {
+                    conversationRepository.removeConversation({'$or': [{bidOwner: {'$in': listUserEmail}},
+                            {bidInterested: {'$in': listUserEmail}}]}, function(resultConversation) {
                         res.redirect("/user/list");
                     });
                 });
