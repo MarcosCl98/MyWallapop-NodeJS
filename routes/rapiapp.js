@@ -150,12 +150,34 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                                 });
                                             }
                                         })
-                                    } else { //La conversacion ya existe, damos error ya que nos deberian de haber pasado id.
-                                        res.status(400); //Como se prohibe enviamos codigo 401 que es de Forbbiden
-                                        res.json({
-                                            error: "Ya existe una conversacion entre vosotros por este producto," +
-                                                " pasa id de la conversacion para poder mandar un mensaje nuevo."
-                                        });
+                                    } else { //La conversacion existe, mandamos el mensaje sobre la misma.
+                                        let conversation = conversations[0]; //Guardamos la conversacion
+                                        //Ahora vamos a chequear si la covnersacion son propietarios
+                                        if (conversation.bidOwner == loginUserEmail ||
+                                            conversation.bidInterested == loginUserEmail) {
+                                            conversation.messages.push([
+                                                loginUserEmail, //usuario que manda el mensaje
+                                                new Date(), //fecha de envio
+                                                message, //Contenido
+                                                false //No ha sido leido por defecto
+                                            ]);
+                                            conversationRepository.updateConversation(
+                                                {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                                                conversation,
+                                                function (conversation) {
+                                                    if (conversation == null) {
+                                                        res.status(500); //Error de servidor
+                                                        res.json({
+                                                            error: "Ha ocurrido un servidor al intentar enviar el mensaje."
+                                                        });
+                                                    } else {
+                                                        res.status(201); //Mensjae enviado correctamente.
+                                                        res.json({
+                                                            error: "Nuevo mensaje enviado. (la conversacion ya existia)"
+                                                        });
+                                                    }
+                                                });
+                                        }
                                     }
                                 });
                         }
