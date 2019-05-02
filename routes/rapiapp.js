@@ -124,7 +124,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
      *      - message: contenido del mensaje que queremos enviar
      * El autor se obtendra a traves del header.
      */
-    app.post("/api/conversation/:id", function (req, res) {
+    app.post("/api/conversation/:id*?", function (req, res) {
         //Parametros.
         let token = req.headers['token'] || req.body.token || req.query.token;
         let bidId = req.body.bidId; //ID a pasar a traves de un formulario.
@@ -207,7 +207,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                             } else {
                                                 res.status(201); //Mensjae enviado correctamente.
                                                 res.json({
-                                                    error: "Conversacion creada y nuevo mensaje enviado."
+                                                    message: "Conversacion creada y nuevo mensaje enviado."
                                                 });
                                             }
                                         })
@@ -223,10 +223,10 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                                 false //No ha sido leido por defecto
                                             ]);
                                             conversationRepository.updateConversation(
-                                                {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                                                {_id: conversationRepository.mongo.ObjectID(conversations[0]._id)},
                                                 conversation,
-                                                function (conversation) {
-                                                    if (conversation == null) {
+                                                function (conversationReturn) {
+                                                    if (conversationReturn == null) {
                                                         res.status(500); //Error de servidor
                                                         res.json({
                                                             error: "Ha ocurrido un servidor al intentar enviar el mensaje."
@@ -234,7 +234,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                                     } else {
                                                         res.status(201); //Mensjae enviado correctamente.
                                                         res.json({
-                                                            error: "Nuevo mensaje enviado. (la conversacion ya existia)"
+                                                            message: "Nuevo mensaje enviado. (la conversacion ya existia)"
                                                         });
                                                     }
                                                 });
