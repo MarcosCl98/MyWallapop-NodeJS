@@ -355,9 +355,9 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
      *      - conversationId : Id de la conversacion
      * El autentificador de usuario se pasara en el header.
      */
-    app.post("/api/conversation/read", function (req, res) {
+    app.post("/api/conversation/:id/read", function (req, res) {
         let token = req.headers['token'] || req.body.token || req.query.token;
-        let conversationId = req.body.conversationId; //Id de la conversacion, no tiene por que tener si es nueva.
+        let conversationId = req.params.id; //Id de la conversacion, no tiene por que tener si es nueva.
 
         //Chequeamos que se pasa el id de conversacion
         if (conversationId == undefined) {

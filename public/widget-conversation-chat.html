@@ -47,6 +47,18 @@
                 $("#contenedor-principal").load("widget-login.html");
             }
         });
+        $.ajax({
+            url: URLbase + "/conversation/" + idConversationSelected + "/read",
+            type: "POST",
+            data: {},
+            dataType: 'json',
+            headers: {"token": token},
+            success: function (respuesta) {
+            },
+            error: function (error) {
+                $("#contenedor-principal").load("widget-login.html");
+            }
+        });
     }
 
     function actualizarTabla(messagesMostrar) {

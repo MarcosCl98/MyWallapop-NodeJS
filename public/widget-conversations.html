@@ -78,8 +78,6 @@
             dataType: 'json',
             headers: {"token": token},
             success: function (respuesta) {
-                console.log("Eliminada: " + _id);
-                $("#" + _id).remove(); // eliminar el <tr> de la converascion
             },
             error: function (error) {
                 $("#contenedor-principal").load("widget-login.html");
