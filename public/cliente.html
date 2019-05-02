@@ -7,11 +7,12 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <script src="./js/cookie.js"></script>
+    <link rel="stylesheet" href="/custom.css"/>
 </head>
 <body>
 
 <!-- Barra de Navegación superior -->
-<nav class="navbar navbar-inverse">
+<nav class="navbar">
     <div class="container-fluid">
         <div class="navbar-header">
             <button class="navbar-toggle" data-target="#myNavbar" data-toggle="collapse" type="button">
@@ -21,10 +22,10 @@
             </button>
             <img alt="logo" src="/img/logo.png"/>
         </div>
-        <div class="collapse navbar-collapse" id="myNavbar">
+        <div class="collapse navbar-collapse navbar-expand-lg navbar-dark fixed-top" id="myNavbar">
             <ul class="nav navbar-nav" id="barra-menu">
-                <li><a onclick=widgetBids()>Ofertas</a></li>
-                <li><a onclick=widgetConversations()>Conversaciones</a></li>
+                <li><a style="color: black" onclick=widgetBids()>Ofertas</a></li>
+                <li><a style="color: black" onclick=widgetConversations()>Conversaciones</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right" id="barra-menu-derecha">
                 <!-- Opciones de menú aqui -->
@@ -71,5 +72,10 @@
     }
 </script>
 
+<footer class="footer">
+    <div class="container">
+        <span>SDI - MyWallapop &copy; by Marcos & Martin</span>
+    </div>
+</footer>
 </body>
 </html>
