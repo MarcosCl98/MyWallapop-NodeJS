@@ -1,4 +1,4 @@
-<div id="widget-conversations">
+<div id="widget-conversation-chat">
     <h1>Chat</h1>
     <table class="table table-hover">
         <thead>
@@ -9,10 +9,16 @@
             <th>Leido</th>
         </tr>
         </thead>
-        <tbody id="tablaCuerpo">
+        <tbody id="tablaChat">
 
         </tbody>
     </table>
+    <div class="input-group input-group-lg">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-lg"></span>
+        </div>
+        <input id="messageContent" type="text" class="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm"/>
+    </div> <br/><button id="buttonSend" onclick=sendMessage() type="button" class="btn btn-success">Enviar mensaje</button>
 </div>
 
 <script>
@@ -46,12 +52,12 @@
             messages = messages +
                 "<tr>" +
                 "<td>" + messagesMostrar[i][0] + "</td>" +
-                "<td>" + messagesMostrar[i][1] + "</td>" +
+                "<td class='date'>" + messagesMostrar[i][1] + "</td>" +
                 "<td>" + messagesMostrar[i][2] + "</td>" +
                 "<td>" + messagesMostrar[i][3] + "</td>" +
                 "</tr>";
         }
-        $("#tablaCuerpo").html(messages);
+        $("#tablaChat").html(messages);
     }
 
     cargarMessages();
@@ -59,5 +65,35 @@
     refresh = setInterval(function() {
         cargarMessages();
     }, 1000);
+
+    function sendMessage() {
+        clearInterval(refresh);
+        let newMessage = document.getElementById("messageContent").value;
+        document.getElementById("messageContent").value = "";
+        $.ajax({
+            url: URLbase + "/conversation/" + idConversationSelected,
+            type: "POST",
+            data: {message : newMessage},
+            dataType: 'json',
+            headers: {"token": token},
+            success: function (respuesta) {
+            },
+            error: function (error) {
+                $("#contenedor-principal").load("widget-login.html");
+            }
+        });
+        refresh = setInterval(function() {
+            cargarMessages();
+        }, 1000);
+    }
+
+    //Cuando pulsemos enter se enviar el mensaje
+    var input = document.getElementById("messageContent");
+    input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+            event.preventDefault();
+            document.getElementById("buttonSend").click();
+        }
+    });
 
 </script>

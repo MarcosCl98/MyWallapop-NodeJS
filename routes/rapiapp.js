@@ -117,7 +117,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
     /**
      * Enviar un mensaje, dos metodos disponibles en funcion de los paremetros que se pasen.
      * Si queremos crear una nueva conversacion deberemos de pasar lo siguiente:
-     *      - idBid : id de la oferta a la cual queremos ofertar
+     *      - idBid : id de la oferta a la cual queremos ofertar se pasa por arriba
      *      - message: mensaje el cual queremos mandar
      * Si queremos mandar un mensaje a una conversacion existente deberemos pasar lo siguiente:
      *      - idConversation: id de la conversacion a la cual queremos mandar el mensaje
@@ -152,6 +152,11 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
             res.status(200);
             res.json({
                 error: "El id de la bid debe de ser de un tamaño de 24 caracteres."
+            })
+        } else if(message.length == 0) {
+            res.status(200);
+            res.json({
+                error: "No se puede enviar un mensaje vacio."
             })
         } else {
             //Obtenemos el email del usuario que quiere enviar el mensaje
