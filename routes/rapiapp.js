@@ -16,7 +16,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                 })
             } else {
                 res.status(200);
-                res.send(JSON.stringify(bids));
+                res.send(bids);
             }
         });
     });
@@ -32,7 +32,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
      *      - message: contenido del mensaje que queremos enviar
      * El autor se obtendra a traves del header.
      */
-    app.post("/api/bid/sendmessage", function (req, res) {
+    app.post("/api/conversation/sendmessage", function (req, res) {
         //Parametros.
         let token = req.headers['token'] || req.body.token || req.query.token;
         let bidId = req.body.bidId; //ID a pasar a traves de un formulario.
@@ -46,11 +46,21 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                 error: "Tienes que pasar uno de los dos atributos, o bidId o conversationId."
             });
         }
-        if (message == undefined) {
+        else if (message == undefined) {
             res.status(200);
             res.json({
                 error: "Se tiene que pasar un atributo message."
             });
+        } else if(conversationId != undefined && conversationId.length != 24) {
+            res.status(200);
+            res.json({
+                error: "El id de conversacion debe de ser de un tamaño de 24 caracteres."
+            })
+        } else if(bidId != undefined && bidId.length != 24) {
+            res.status(200);
+            res.json({
+                error: "El id de la bid debe de ser de un tamaño de 24 caracteres."
+            })
         } else {
             //Obtenemos el email del usuario que quiere enviar el mensaje
             let decoded = app.get('jwt').verify(token, 'secreto');
@@ -116,85 +126,141 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                     }
                 });
             } else { //Se nos pasa id, pero no de la bid, por lo que damos por hecho que ya existe.
-                conversationRepository.getConversations(
-                    {_id: conversationRepository.mongo.ObjectID(conversationId)},
-                    function (conversations) {
-                        if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
-                            res.status(500); //Error de servidor
-                            res.json({
-                                error: "Esa conversacion a la que quieres enviar un mensaje no existe."
-                            });
-                        } else {
-                            let conversation = conversations[0]; //Guardamos la conversacion
-                            //Ahora vamos a chequear si la covnersacion son propietarios
-                            if (conversation.bidOwner == loginUserEmail ||
-                                conversation.bidInterested == loginUserEmail) {
-                                conversation.messages.push([
-                                    loginUserEmail, //usuario que manda el mensaje
-                                    new Date(), //fecha de envio
-                                    message, //Contenido
-                                    false //No ha sido leido por defecto
-                                ]);
-                                conversationRepository.updateConversation(
-                                    {_id: conversationRepository.mongo.ObjectID(conversationId)},
-                                    conversation,
-                                    function (conversation) {
-                                        if (conversation == null) {
-                                            res.status(500); //Error de servidor
-                                            res.json({
-                                                error: "Ha ocurrido un servidor al intentar enviar el mensaje."
-                                            });
-                                        } else {
-                                            res.status(201); //Mensjae enviado correctamente.
-                                            res.json({
-                                                error: "Nuevo mensaje enviado."
-                                            });
-                                        }
-                                    });
-                            } else { //Esa conversacion no es tuya
+                if (conversationId.length != 24) {
+                    res.status(200); //El tamaño del id de conversacion debe de ser 24.
+                    res.json({
+                        error: "El tamaño del id de conversacion debe de ser 24."
+                    })
+                } else {
+                    conversationRepository.getConversations(
+                        {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                        function (conversations) {
+                            if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
                                 res.status(500); //Error de servidor
                                 res.json({
-                                    error: "Esa conversacion a la que intentas mandar un mensaje no es tuya."
+                                    error: "Esa conversacion a la que quieres enviar un mensaje no existe."
                                 });
+                            } else {
+                                let conversation = conversations[0]; //Guardamos la conversacion
+                                //Ahora vamos a chequear si la covnersacion son propietarios
+                                if (conversation.bidOwner == loginUserEmail ||
+                                    conversation.bidInterested == loginUserEmail) {
+                                    conversation.messages.push([
+                                        loginUserEmail, //usuario que manda el mensaje
+                                        new Date(), //fecha de envio
+                                        message, //Contenido
+                                        false //No ha sido leido por defecto
+                                    ]);
+                                    conversationRepository.updateConversation(
+                                        {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                                        conversation,
+                                        function (conversation) {
+                                            if (conversation == null) {
+                                                res.status(500); //Error de servidor
+                                                res.json({
+                                                    error: "Ha ocurrido un servidor al intentar enviar el mensaje."
+                                                });
+                                            } else {
+                                                res.status(201); //Mensjae enviado correctamente.
+                                                res.json({
+                                                    error: "Nuevo mensaje enviado."
+                                                });
+                                            }
+                                        });
+                                } else { //Esa conversacion no es tuya
+                                    res.status(500); //Error de servidor
+                                    res.json({
+                                        error: "Esa conversacion a la que intentas mandar un mensaje no es tuya."
+                                    });
+                                }
                             }
-                        }
-                    });
+                        });
+                }
             }
         }
     });
 
-/**
- * Metodo post para autetificar.
- * Hay que mandar un formulario con:
- *      email: email del usuario
- *      password: password de la cuenta
- * Este te devolvera un token necesario para acceder a todos los demas metodos.
- */
-app.post("/api/autenticar/", function (req, res) {
-    let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
-        .update(req.body.password).digest('hex');
-    let criterio = {
-        email: req.body.email,
-        password: seguro
-    }
+    /**
+     * Mostrar una conversacion.
+     * Se debe pasar como parametro body lo siguiente:
+     *      - conversationId : Id de la conversacion
+     * El autentificador de usuario se pasara en el header.
+     */
+    app.post("/api/conversation/messages", function (req, res) {
+        let token = req.headers['token'] || req.body.token || req.query.token;
+        let conversationId = req.body.conversationId; //Id de la conversacion, no tiene por que tener si es nueva.
 
-    usersRepository.getUsers(criterio, function (usuarios) {
-        if (usuarios == null || usuarios.length == 0) {
-            res.status(401); // Unauthorized
-            res.json({
-                autenticado: false
-            })
-        } else {
-            let token = app.get('jwt').sign(
-                {usuario: criterio.email, tiempo: Date.now() / 1000},
-                "secreto");
+        //Chequeamos que se pasa el id de conversacion
+        if (conversationId == undefined) {
             res.status(200);
             res.json({
-                autenticado: true,
-                token: token
+                error: "Tienes que pasar un conversationId como parametro en el body."
+            });
+        } else if (conversationId.length != 24) {
+            res.status(200); //El tamaño del id de conversacion debe de ser 24.
+            res.json({
+                error: "El tamaño del id de conversacion debe de ser 24."
             })
+        } else {
+            //Obtenemos el email del usuario que quiere enviar el mensaje
+            let decoded = app.get('jwt').verify(token, 'secreto');
+            let loginUserEmail = decoded.usuario; //Aqui obtenemos el usuario a traves de usar jwt
+
+            conversationRepository.getConversations(
+                {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                function (conversations) {
+                    if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
+                        res.status(500); //Error de servidor
+                        res.json({
+                            error: "Esa conversacion no existe."
+                        });
+                    } else if (conversations[0].bidOwner == loginUserEmail ||
+                        conversations[0].bidInterested == loginUserEmail) {
+                        //Es el dueño, devolver solo los mensajes
+                        res.status(200);
+                        res.json(conversations[0].messages);
+                    } else {
+                        res.status(200);
+                        res.json({
+                            error: "No eres participante de esa conversacion."
+                        });
+                    }
+                });
+        }
+    });
+
+    /**
+     * Metodo post para autetificar.
+     * Hay que mandar un formulario con:
+     *      email: email del usuario
+     *      password: password de la cuenta
+     * Este te devolvera un token necesario para acceder a todos los demas metodos.
+     */
+    app.post("/api/autenticar/", function (req, res) {
+        let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
+            .update(req.body.password).digest('hex');
+        let criterio = {
+            email: req.body.email,
+            password: seguro
         }
 
+        usersRepository.getUsers(criterio, function (usuarios) {
+            if (usuarios == null || usuarios.length == 0) {
+                res.status(401); // Unauthorized
+                res.json({
+                    autenticado: false
+                })
+            } else {
+                let token = app.get('jwt').sign(
+                    {usuario: criterio.email, tiempo: Date.now() / 1000},
+                    "secreto");
+                res.status(200);
+                res.json({
+                    autenticado: true,
+                    token: token
+                })
+            }
+
+        });
     });
-});
 }
