@@ -7,6 +7,7 @@
             <th>Titulo oferta</th>
             <th>Ofertante</th>
             <th>Interesado</th>
+            <th>Mensajes no leidos</th>
             <th class="col-md-1"></th>
             <th class="col-md-1"></th>
         </tr>
@@ -50,6 +51,7 @@
                 "<td>" + converascionesMostrar[i].bidTitle + "</td>" +
                 "<td>" + converascionesMostrar[i].bidOwner + "</td>" +
                 "<td>" + converascionesMostrar[i].bidInterested + "</td>" +
+                "<td>" + converascionesMostrar[i].noReadMessages + "</td>" +
                 "<td>" +
                 "<a onclick=abrir('" + converascionesMostrar[i]._id + "')>Abrir</a><br>" +
                 "<a onclick=eliminar('" + converascionesMostrar[i]._id + "')>Eliminar</a>" +
@@ -63,7 +65,7 @@
 
     refresh = setInterval(function() {
         cargarConversaciones();
-    }, 1000);
+    }, 5000);
 
     function abrir(_id) {
         idConversationSelected = _id;

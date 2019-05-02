@@ -66,8 +66,10 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
         let token = req.headers['token'] || req.body.token || req.query.token;
         let decoded = app.get('jwt').verify(token, 'secreto');
         let loginUserEmail = decoded.usuario;
-        conversationRepository.getConversations({$or: [{bidOwner: loginUserEmail},
-                {bidInterested: loginUserEmail}]}, function (conversations) {
+        conversationRepository.getConversations({
+            $or: [{bidOwner: loginUserEmail},
+                {bidInterested: loginUserEmail}]
+        }, function (conversations) {
             if (conversations == null) {
                 res.status(500);
                 res.json({
@@ -77,10 +79,17 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                 res.status(200);
                 let iteration = 0;
                 conversations.forEach(function (conversation) {
-                    bidsRepository.getBids({_id : bidsRepository.mongo.ObjectID(conversation.bidId)}, function (bids) {
+                    bidsRepository.getBids({_id: bidsRepository.mongo.ObjectID(conversation.bidId)}, function (bids) {
                         conversation.bidTitle = bids[0].title;
+                        let noReadMessages = 0;
+                        for(let message in conversation.messages) {
+                            if(message[0] != loginUserEmail && message[3] == false) {
+                                noReadMessages++;
+                            }
+                        }
+                        conversation.noReadMessages = noReadMessages;
                         iteration++;
-                        if(conversations.length == iteration) {
+                        if (conversations.length == iteration) {
                             res.send(conversations);
                         }
                     });
@@ -99,8 +108,10 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
         let decoded = app.get('jwt').verify(token, 'secreto');
         let loginUserEmail = decoded.usuario;
         let idConversation = req.params.id;
-        conversationRepository.getConversations({$and : [{_id : conversationRepository.mongo.ObjectID(idConversation)},
-                {$or: [{bidOwner: loginUserEmail}, {bidInterested: loginUserEmail}]}]}, function (conversations) {
+        conversationRepository.getConversations({
+            $and: [{_id: conversationRepository.mongo.ObjectID(idConversation)},
+                {$or: [{bidOwner: loginUserEmail}, {bidInterested: loginUserEmail}]}]
+        }, function (conversations) {
             if (conversations == null) {
                 res.status(500);
                 res.json({
@@ -113,6 +124,74 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
         });
     });
 
+    /**
+     * Marcar como leidos mensajes de una covnersacion.
+     * Se marcaran como leidos los mensajes enviados por la otra persona la cual no es la que esta logueada.
+     * Se debe pasar como parametro body lo siguiente:
+     *      - conversationId : Id de la conversacion
+     * El autentificador de usuario se pasara en el header.
+     */
+    app.post("/api/conversation/:id/read", function (req, res) {
+        let token = req.headers['token'] || req.body.token || req.query.token;
+        let conversationId = req.params.id; //Id de la conversacion, no tiene por que tener si es nueva.
+
+        //Chequeamos que se pasa el id de conversacion
+        if (conversationId == undefined) {
+            res.status(200);
+            res.json({
+                error: "Tienes que pasar un conversationId como parametro en el body."
+            });
+        } else if (conversationId.length != 24) {
+            res.status(200); //El tamaño del id de conversacion debe de ser 24.
+            res.json({
+                error: "El tamaño del id de conversacion debe de ser 24."
+            })
+        } else {
+            //Obtenemos el email del usuario que quiere enviar el mensaje
+            let decoded = app.get('jwt').verify(token, 'secreto');
+            let loginUserEmail = decoded.usuario; //Aqui obtenemos el usuario a traves de usar jwt
+
+            conversationRepository.getConversations(
+                {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                function (conversations) {
+                    if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
+                        res.status(500); //Error de servidor
+                        res.json({
+                            error: "Esa conversacion no existe."
+                        });
+                    } else if (conversations[0].bidOwner == loginUserEmail ||
+                        conversations[0].bidInterested == loginUserEmail) { //Es el dueño
+                        let updatedConversation = conversations[0]; //Conversacion
+                        //Actualizamos los mensajes
+                        updatedConversation.messages.forEach(function (message) {
+                            if (message[0] != loginUserEmail) { //Si no fue enviado por el
+                                message[3] = true; //Lo marcamos como leido
+                            }
+                        });
+                        conversationRepository.updateConversation(
+                            {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                            updatedConversation,
+                            function (conversation) {
+                                if (conversation == null) {
+                                    res.status(500); //Error de servidor
+                                    res.json({
+                                        error: "Ocurrio un error al actualizar la conversacion."
+                                    });
+                                } else {
+                                    //Devolvemos los mensajes actualizados
+                                    res.status(200);
+                                    res.json(conversations[0].messages);
+                                }
+                            });
+                    } else {
+                        res.status(200);
+                        res.json({
+                            error: "No eres participante de esa conversacion."
+                        });
+                    }
+                });
+        }
+    });
 
     /**
      * Enviar un mensaje, dos metodos disponibles en funcion de los paremetros que se pasen.
@@ -137,23 +216,22 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
             res.json({
                 error: "Tienes que pasar uno de los dos atributos, o bidId o conversationId."
             });
-        }
-        else if (message == undefined) {
+        } else if (message == undefined) {
             res.status(200);
             res.json({
                 error: "Se tiene que pasar un atributo message."
             });
-        } else if(conversationId != undefined && conversationId.length != 24) {
+        } else if (conversationId != undefined && conversationId.length != 24) {
             res.status(200);
             res.json({
                 error: "El id de conversacion debe de ser de un tamaño de 24 caracteres."
             })
-        } else if(bidId != undefined && bidId.length != 24) {
+        } else if (bidId != undefined && bidId.length != 24) {
             res.status(200);
             res.json({
                 error: "El id de la bid debe de ser de un tamaño de 24 caracteres."
             })
-        } else if(message.length == 0) {
+        } else if (message.length == 0) {
             res.status(200);
             res.json({
                 error: "No se puede enviar un mensaje vacio."
@@ -349,75 +427,6 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
     });
 
     /**
-     * Marcar como leidos mensajes de una covnersacion.
-     * Se marcaran como leidos los mensajes enviados por la otra persona la cual no es la que esta logueada.
-     * Se debe pasar como parametro body lo siguiente:
-     *      - conversationId : Id de la conversacion
-     * El autentificador de usuario se pasara en el header.
-     */
-    app.post("/api/conversation/:id/read", function (req, res) {
-        let token = req.headers['token'] || req.body.token || req.query.token;
-        let conversationId = req.params.id; //Id de la conversacion, no tiene por que tener si es nueva.
-
-        //Chequeamos que se pasa el id de conversacion
-        if (conversationId == undefined) {
-            res.status(200);
-            res.json({
-                error: "Tienes que pasar un conversationId como parametro en el body."
-            });
-        } else if (conversationId.length != 24) {
-            res.status(200); //El tamaño del id de conversacion debe de ser 24.
-            res.json({
-                error: "El tamaño del id de conversacion debe de ser 24."
-            })
-        } else {
-            //Obtenemos el email del usuario que quiere enviar el mensaje
-            let decoded = app.get('jwt').verify(token, 'secreto');
-            let loginUserEmail = decoded.usuario; //Aqui obtenemos el usuario a traves de usar jwt
-
-            conversationRepository.getConversations(
-                {_id: conversationRepository.mongo.ObjectID(conversationId)},
-                function (conversations) {
-                    if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
-                        res.status(500); //Error de servidor
-                        res.json({
-                            error: "Esa conversacion no existe."
-                        });
-                    } else if (conversations[0].bidOwner == loginUserEmail ||
-                        conversations[0].bidInterested == loginUserEmail) { //Es el dueño
-                        let updatedConversation = conversations[0]; //Conversacion
-                        //Actualizamos los mensajes
-                        updatedConversation.messages.forEach(function (message) {
-                            if(message[0] != loginUserEmail) { //Si no fue enviado por el
-                                message[3] = true; //Lo marcamos como leido
-                            }
-                        });
-                        conversationRepository.updateConversation(
-                            {_id: conversationRepository.mongo.ObjectID(conversationId)},
-                            updatedConversation,
-                            function (conversation) {
-                                if(conversation == null) {
-                                    res.status(500); //Error de servidor
-                                    res.json({
-                                        error: "Ocurrio un error al actualizar la conversacion."
-                                    });
-                                } else {
-                                    //Devolvemos los mensajes actualizados
-                                    res.status(200);
-                                    res.json(conversations[0].messages);
-                                }
-                            });
-                    } else {
-                        res.status(200);
-                        res.json({
-                            error: "No eres participante de esa conversacion."
-                        });
-                    }
-                });
-        }
-    });
-
-    /**
      * Borrar una conversacion.
      * Se debe pasar como parametro body lo siguiente:
      *      - conversationId : Id de la conversacion
@@ -454,9 +463,9 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                     } else if (conversations[0].bidOwner == loginUserEmail ||
                         conversations[0].bidInterested == loginUserEmail) {
                         //Es participante, por tanto hay que borrar la conversacion
-                        conversationRepository.removeConversation( {_id : conversationRepository.mongo.ObjectID(conversationId)},
+                        conversationRepository.removeConversation({_id: conversationRepository.mongo.ObjectID(conversationId)},
                             function (conversation) {
-                                if(conversation == null) {
+                                if (conversation == null) {
                                     res.status(500);
                                     res.json({
                                         mensaje: "Ha ocurrido un error al intentar borrar la conversacion."
