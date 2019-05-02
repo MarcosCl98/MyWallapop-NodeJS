@@ -67,7 +67,7 @@
             messages = messages +
                 "<tr>" +
                 "<td>" + messagesMostrar[i][0] + "</td>" +
-                "<td class='date'>" + messagesMostrar[i][1] + "</td>" +
+                "<td>" + messagesMostrar[i][1].replace("T", " ").slice(0, -5) + "</td>" +
                 "<td>" + messagesMostrar[i][2] + "</td>" +
                 "<td>" + messagesMostrar[i][3] + "</td>" +
                 "</tr>";
