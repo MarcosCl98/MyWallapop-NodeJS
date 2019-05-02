@@ -82,11 +82,11 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                     bidsRepository.getBids({_id: bidsRepository.mongo.ObjectID(conversation.bidId)}, function (bids) {
                         conversation.bidTitle = bids[0].title;
                         let noReadMessages = 0;
-                        for(let message in conversation.messages) {
+                        conversation.messages.forEach(function(message) {
                             if(message[0] != loginUserEmail && message[3] == false) {
                                 noReadMessages++;
                             }
-                        }
+                        });
                         conversation.noReadMessages = noReadMessages;
                         iteration++;
                         if (conversations.length == iteration) {
