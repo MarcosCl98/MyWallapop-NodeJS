@@ -17,8 +17,11 @@
         <div class="input-group-prepend">
             <span class="input-group-text" id="inputGroup-sizing-lg"></span>
         </div>
-        <input id="messageContent" type="text" class="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm"/>
-    </div> <br/><button id="buttonSend" onclick=sendMessage() type="button" class="btn btn-success">Enviar mensaje</button>
+        <input id="messageContent" type="text" class="form-control" aria-label="Large"
+               aria-describedby="inputGroup-sizing-sm"/>
+    </div>
+    <br/>
+    <button id="buttonSend" onclick=sendMessage() type="button" class="btn btn-success">Enviar mensaje</button>
 </div>
 
 <script>
@@ -62,7 +65,7 @@
 
     cargarMessages();
 
-    refresh = setInterval(function() {
+    refresh = setInterval(function () {
         cargarMessages();
     }, 1000);
 
@@ -73,7 +76,7 @@
         $.ajax({
             url: URLbase + "/conversation/" + idConversationSelected,
             type: "POST",
-            data: {message : newMessage},
+            data: {message: newMessage},
             dataType: 'json',
             headers: {"token": token},
             success: function (respuesta) {
@@ -82,14 +85,14 @@
                 $("#contenedor-principal").load("widget-login.html");
             }
         });
-        refresh = setInterval(function() {
+        refresh = setInterval(function () {
             cargarMessages();
         }, 1000);
     }
 
     //Cuando pulsemos enter se enviar el mensaje
     var input = document.getElementById("messageContent");
-    input.addEventListener("keyup", function(event) {
+    input.addEventListener("keyup", function (event) {
         if (event.keyCode === 13) {
             event.preventDefault();
             document.getElementById("buttonSend").click();
