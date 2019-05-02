@@ -2,8 +2,17 @@
 const express = require('express');
 const app = express();
 
+app.use(function (req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "POST, GET, DELETE, UPDATE, PUT");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, token");
+    // Debemos especificar todas las headers que se aceptan. Content-Type , token
+    next();
+});
+
 const jwt = require('jsonwebtoken');
-app.set('jwt',jwt);
+app.set('jwt', jwt);
 
 const mongo = require('mongodb');
 const swig = require('swig');
@@ -35,15 +44,15 @@ app.use(expressSession({
 //ROUTERS
 // routerUsuarioToken
 var routerUsuarioToken = express.Router();
-routerUsuarioToken.use(function(req, res, next) {
+routerUsuarioToken.use(function (req, res, next) {
     // obtener el token, vía headers (opcionalmente GET y/o POST).
     var token = req.headers['token'] || req.body.token || req.query.token;
     if (token != null) {// verificar el token
-        jwt.verify(token, 'secreto', function(err, infoToken) {
-            if (err || (Date.now()/1000 - infoToken.tiempo) > 240 ){
+        jwt.verify(token, 'secreto', function (err, infoToken) {
+            if (err || (Date.now() / 1000 - infoToken.tiempo) > 240) {
                 res.status(403); // Forbidden
                 res.json({
-                    acceso : false,
+                    acceso: false,
                     error: 'Token invalido o caducado'
                 });
                 // También podríamos comprobar que intoToken.usuario existe
@@ -59,7 +68,7 @@ routerUsuarioToken.use(function(req, res, next) {
     } else {
         res.status(403); // Forbidden
         res.json({
-            acceso : false,
+            acceso: false,
             mensaje: 'No hay Token'
         });
     }
@@ -106,7 +115,7 @@ routerUsuarioAutor.use(function (req, res, next) {
     })
 });
 //Aplicar routerUsuarioAutor
-app.use("/bid/mybids/delete",routerUsuarioAutor);
+app.use("/bid/mybids/delete", routerUsuarioAutor);
 
 //Inicializado de repositorios
 const usersRepository = require('./repositories/UserRepository');
