@@ -2,6 +2,12 @@
 const express = require('express');
 const app = express();
 
+//Ponemos a funcionar el logger
+const log4js = require('log4js');
+const logger = log4js.getLogger();
+logger.level = 'debug';
+app.set('logger', logger);
+
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Credentials", "true");
@@ -71,6 +77,7 @@ routerUsuarioToken.use(function (req, res, next) {
             acceso: false,
             mensaje: 'No hay Token'
         });
+        app.get('logger').debug("Peticion cancelada por que no habia token.");
     }
 });
 // Aplicar routerUsuarioToken
@@ -83,6 +90,7 @@ routerUsuarioSession.use(function (req, res, next) {
     if (req.session.usuario) {
         next();
     } else {
+        app.get('logger').debug("Peiticon cancelada por que no se habia logueado el usuario.");
         res.redirect("/login");
     }
 });
@@ -95,6 +103,7 @@ routerAdminSession.use(function (req, res, next) {
     if (req.session.usuario === "admin@email.com") {
         next();
     } else {
+        app.get('logger').debug("Usuario intento acceder a zona administrativa: " + req.session.usuario);
         res.redirect("/forbidden");
     }
 });
@@ -110,6 +119,7 @@ routerUsuarioAutor.use(function (req, res, next) {
         if (bids[0].userEmail == req.session.usuario) {
             next();
         } else {
+            app.get('logger').debug("Usuario intento borrar ofertas que no eran suyas: " + req.session.usuario);
             res.redirect("/");
         }
     })

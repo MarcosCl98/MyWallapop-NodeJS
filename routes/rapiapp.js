@@ -25,6 +25,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                 let token = app.get('jwt').sign(
                     {usuario: criterio.email, tiempo: Date.now() / 1000},
                     "secreto");
+                app.get('logger').debug("El siguiente usuario ha iniciado sesion: " + criterio.email);
                 res.status(200);
                 res.json({
                     autenticado: true,

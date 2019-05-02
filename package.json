@@ -9,6 +9,7 @@
     "express-session": "^1.16.1",
     "favicon": "0.0.2",
     "jsonwebtoken": "^8.5.1",
+    "log4js": "^4.1.0",
     "mongodb": "^2.2.33",
     "nodemon": "^1.19.0",
     "serve-favicon": "^2.5.0",

@@ -85,6 +85,7 @@ module.exports = function (app, swig, usersRepository, bidsRepository, conversat
                     } else {
                         req.session.usuario = usuario.email;
                         req.session.money = usuario.money;
+                        app.get('logger').debug("Usuario nuevo resgitrado: " + usuario.email);
                         res.redirect("/home?mensaje=Has iniciado sesión correctamente." +
                             "&tipoMensaje=alert-success");
 
@@ -132,6 +133,7 @@ module.exports = function (app, swig, usersRepository, bidsRepository, conversat
                     req.session.money = usuarios[0].money;
                     req.session.usuario = usuarios[0].email;
                     res.redirect("/");
+                    app.get('logger').debug("El siguiente usuario ha iniciado sesion: " + usuario[0].email);
                 }
             });
         }
