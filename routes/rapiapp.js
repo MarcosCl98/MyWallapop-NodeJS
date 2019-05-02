@@ -1,4 +1,40 @@
 module.exports = function (app, bidsRepository, usersRepository, conversationRepository) {
+
+    /**
+     * Metodo post para autetificar.
+     * Hay que mandar un formulario con:
+     *      email: email del usuario
+     *      password: password de la cuenta
+     * Este te devolvera un token necesario para acceder a todos los demas metodos.
+     */
+    app.post("/api/autenticar", function (req, res) {
+        let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
+            .update(req.body.password).digest('hex');
+        let criterio = {
+            email: req.body.email,
+            password: seguro
+        }
+
+        usersRepository.getUsers(criterio, function (usuarios) {
+            if (usuarios == null || usuarios.length == 0) {
+                res.status(401); // Unauthorized
+                res.json({
+                    autenticado: false
+                })
+            } else {
+                let token = app.get('jwt').sign(
+                    {usuario: criterio.email, tiempo: Date.now() / 1000},
+                    "secreto");
+                res.status(200);
+                res.json({
+                    autenticado: true,
+                    token: token
+                })
+            }
+
+        });
+    });
+
     /**
      * Devuelve las ofertas de todos los usuarios menos
      * de si mismo.
@@ -186,7 +222,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
      *      - conversationId : Id de la conversacion
      * El autentificador de usuario se pasara en el header.
      */
-    app.post("/api/conversation/messages", function (req, res) {
+    app.post("/api/conversation/get", function (req, res) {
         let token = req.headers['token'] || req.body.token || req.query.token;
         let conversationId = req.body.conversationId; //Id de la conversacion, no tiene por que tener si es nueva.
 
@@ -236,7 +272,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
      *      - conversationId : Id de la conversacion
      * El autentificador de usuario se pasara en el header.
      */
-    app.post("/api/conversation/readmessages", function (req, res) {
+    app.post("/api/conversation/read", function (req, res) {
         let token = req.headers['token'] || req.body.token || req.query.token;
         let conversationId = req.body.conversationId; //Id de la conversacion, no tiene por que tener si es nueva.
 
@@ -299,37 +335,63 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
     });
 
     /**
-     * Metodo post para autetificar.
-     * Hay que mandar un formulario con:
-     *      email: email del usuario
-     *      password: password de la cuenta
-     * Este te devolvera un token necesario para acceder a todos los demas metodos.
+     * Borrar una conversacion.
+     * Se debe pasar como parametro body lo siguiente:
+     *      - conversationId : Id de la conversacion
+     * El autentificador de usuario se pasara en el header.
      */
-    app.post("/api/autenticar/", function (req, res) {
-        let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
-            .update(req.body.password).digest('hex');
-        let criterio = {
-            email: req.body.email,
-            password: seguro
+    app.post("/api/conversation/delete", function (req, res) {
+        let token = req.headers['token'] || req.body.token || req.query.token;
+        let conversationId = req.body.conversationId; //Id de la conversacion, no tiene por que tener si es nueva.
+
+        //Chequeamos que se pasa el id de conversacion
+        if (conversationId == undefined) {
+            res.status(200);
+            res.json({
+                error: "Tienes que pasar un conversationId como parametro en el body."
+            });
+        } else if (conversationId.length != 24) {
+            res.status(200); //El tamaño del id de conversacion debe de ser 24.
+            res.json({
+                error: "El tamaño del id de conversacion debe de ser 24."
+            })
+        } else {
+            //Obtenemos el email del usuario que quiere enviar el mensaje
+            let decoded = app.get('jwt').verify(token, 'secreto');
+            let loginUserEmail = decoded.usuario; //Aqui obtenemos el usuario a traves de usar jwt
+
+            conversationRepository.getConversations(
+                {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                function (conversations) {
+                    if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
+                        res.status(500); //Error de servidor
+                        res.json({
+                            error: "Esa conversacion no existe."
+                        });
+                    } else if (conversations[0].bidOwner == loginUserEmail ||
+                        conversations[0].bidInterested == loginUserEmail) {
+                        //Es participante, por tanto hay que borrar la conversacion
+                        conversationRepository.removeConversation( {_id : conversationRepository.mongo.ObjectID(conversationId)},
+                            function (conversation) {
+                                if(conversation == null) {
+                                    res.status(500);
+                                    res.json({
+                                        mensaje: "Ha ocurrido un error al intentar borrar la conversacion."
+                                    });
+                                } else {
+                                    res.status(200);
+                                    res.json({
+                                        mensaje: "Conversacion borrada correctamente."
+                                    });
+                                }
+                            });
+                    } else {
+                        res.status(200);
+                        res.json({
+                            error: "No eres participante de esa conversacion."
+                        });
+                    }
+                });
         }
-
-        usersRepository.getUsers(criterio, function (usuarios) {
-            if (usuarios == null || usuarios.length == 0) {
-                res.status(401); // Unauthorized
-                res.json({
-                    autenticado: false
-                })
-            } else {
-                let token = app.get('jwt').sign(
-                    {usuario: criterio.email, tiempo: Date.now() / 1000},
-                    "secreto");
-                res.status(200);
-                res.json({
-                    autenticado: true,
-                    token: token
-                })
-            }
-
-        });
     });
 }
