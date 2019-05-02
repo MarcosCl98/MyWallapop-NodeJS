@@ -230,6 +230,75 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
     });
 
     /**
+     * Marcar como leidos mensajes de una covnersacion.
+     * Se marcaran como leidos los mensajes enviados por la otra persona la cual no es la que esta logueada.
+     * Se debe pasar como parametro body lo siguiente:
+     *      - conversationId : Id de la conversacion
+     * El autentificador de usuario se pasara en el header.
+     */
+    app.post("/api/conversation/readmessages", function (req, res) {
+        let token = req.headers['token'] || req.body.token || req.query.token;
+        let conversationId = req.body.conversationId; //Id de la conversacion, no tiene por que tener si es nueva.
+
+        //Chequeamos que se pasa el id de conversacion
+        if (conversationId == undefined) {
+            res.status(200);
+            res.json({
+                error: "Tienes que pasar un conversationId como parametro en el body."
+            });
+        } else if (conversationId.length != 24) {
+            res.status(200); //El tamaño del id de conversacion debe de ser 24.
+            res.json({
+                error: "El tamaño del id de conversacion debe de ser 24."
+            })
+        } else {
+            //Obtenemos el email del usuario que quiere enviar el mensaje
+            let decoded = app.get('jwt').verify(token, 'secreto');
+            let loginUserEmail = decoded.usuario; //Aqui obtenemos el usuario a traves de usar jwt
+
+            conversationRepository.getConversations(
+                {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                function (conversations) {
+                    if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
+                        res.status(500); //Error de servidor
+                        res.json({
+                            error: "Esa conversacion no existe."
+                        });
+                    } else if (conversations[0].bidOwner == loginUserEmail ||
+                        conversations[0].bidInterested == loginUserEmail) { //Es el dueño
+                        let updatedConversation = conversations[0]; //Conversacion
+                        //Actualizamos los mensajes
+                        updatedConversation.messages.forEach(function (message) {
+                            if(message[0] != loginUserEmail) { //Si no fue enviado por el
+                                message[3] = true; //Lo marcamos como leido
+                            }
+                        });
+                        conversationRepository.updateConversation(
+                            {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                            updatedConversation,
+                            function (conversation) {
+                                if(conversation == null) {
+                                    res.status(500); //Error de servidor
+                                    res.json({
+                                        error: "Ocurrio un error al actualizar la conversacion."
+                                    });
+                                } else {
+                                    //Devolvemos los mensajes actualizados
+                                    res.status(200);
+                                    res.json(conversations[0].messages);
+                                }
+                            });
+                    } else {
+                        res.status(200);
+                        res.json({
+                            error: "No eres participante de esa conversacion."
+                        });
+                    }
+                });
+        }
+    });
+
+    /**
      * Metodo post para autetificar.
      * Hay que mandar un formulario con:
      *      email: email del usuario
