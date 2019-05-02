@@ -42,11 +42,12 @@
 <script>
     var token;
     var URLbase = "http://localhost:8081/api";
+    var refresh; //Se usara para parar el antiguo refresh
     $("#contenedor-principal").load("widget-login.html");
 
     if (Cookies.get('token') != null) {
         token = Cookies.get('token');
-        $("#contenedor-principal").load("widget-canciones.html");
+        $("#contenedor-principal").load("widget-bids.html");
 
         var url = new URL(window.location.href);
         var w = url.searchParams.get("w");
@@ -56,6 +57,17 @@
         if (w == "bids") {
             $("#contenedor-principal").load("widget-bids.html");
         }
+        if (w == "conversations") {
+            $("#contenedor-principal").load("widget-conversations.html");
+        }
+    }
+
+    function widgetBids() {
+        $("#contenedor-principal").load("widget-bids.html");
+    }
+
+    function widgetConversations() {
+        $("#contenedor-principal").load("widget-conversations.html");
     }
 </script>
 

@@ -1,0 +1,63 @@
+<div id="widget-conversations">
+    <h1>Chat</h1>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Emisor</th>
+            <th>Fecha</th>
+            <th>Mensaje</th>
+            <th>Leido</th>
+        </tr>
+        </thead>
+        <tbody id="tablaCuerpo">
+
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+    clearInterval(refresh); //Lo primero que hacemos es parar el refrescador antiguo
+
+    window.history.pushState("", "", "/cliente.html?w=conversation-chat");
+
+    var messages;
+
+    function cargarMessages() {
+        $.ajax({
+            url: URLbase + "/conversation/" + idConversationSelected,
+            type: "GET",
+            data: {},
+            dataType: 'json',
+            headers: {"token": token},
+            success: function (respuesta) {
+                messages = respuesta;
+                actualizarTabla(messages);
+            },
+            error: function (error) {
+                $("#contenedor-principal").load("widget-login.html");
+            }
+        });
+    }
+
+    function actualizarTabla(messagesMostrar) {
+        let messages = "";
+        for (i = 0; i < messagesMostrar.length; i++) {
+            messages = messages +
+                "<tr>" +
+                "<td>" + messagesMostrar[i][0] + "</td>" +
+                "<td>" + messagesMostrar[i][1] + "</td>" +
+                "<td>" + messagesMostrar[i][2] + "</td>" +
+                "<td>" + messagesMostrar[i][3] + "</td>" +
+                "</tr>";
+        }
+        $("#tablaCuerpo").html(messages);
+    }
+
+    cargarMessages();
+
+    refresh = setInterval(function() {
+        cargarMessages();
+    }, 1000);
+
+</script>

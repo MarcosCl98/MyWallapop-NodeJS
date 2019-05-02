@@ -57,6 +57,62 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
         });
     });
 
+    /**
+     * Devuelve las conversaciones de un usuario
+     * de si mismo.
+     * Necesita que lleve el token en el header.
+     */
+    app.get("/api/conversation", function (req, res) {
+        let token = req.headers['token'] || req.body.token || req.query.token;
+        let decoded = app.get('jwt').verify(token, 'secreto');
+        let loginUserEmail = decoded.usuario;
+        conversationRepository.getConversations({$or: [{bidOwner: loginUserEmail},
+                {bidInterested: loginUserEmail}]}, function (conversations) {
+            if (conversations == null) {
+                res.status(500);
+                res.json({
+                    error: "Se ha producido un error"
+                })
+            } else {
+                res.status(200);
+                let iteration = 0;
+                conversations.forEach(function (conversation) {
+                    bidsRepository.getBids({_id : bidsRepository.mongo.ObjectID(conversation.bidId)}, function (bids) {
+                        conversation.bidTitle = bids[0].title;
+                        iteration++;
+                        if(conversations.length == iteration) {
+                            res.send(conversations);
+                        }
+                    });
+                })
+            }
+        });
+    });
+
+    /**
+     * Devuelve una conversacion en concreto.
+     * de si mismo.
+     * Necesita que lleve el token en el header.
+     */
+    app.get("/api/conversation/:id", function (req, res) {
+        let token = req.headers['token'] || req.body.token || req.query.token;
+        let decoded = app.get('jwt').verify(token, 'secreto');
+        let loginUserEmail = decoded.usuario;
+        let idConversation = req.params.id;
+        conversationRepository.getConversations({$and : [{_id : conversationRepository.mongo.ObjectID(idConversation)},
+                {$or: [{bidOwner: loginUserEmail}, {bidInterested: loginUserEmail}]}]}, function (conversations) {
+            if (conversations == null) {
+                res.status(500);
+                res.json({
+                    error: "Se ha producido un error"
+                })
+            } else {
+                res.status(200);
+                res.send(conversations[0].messages);
+            }
+        });
+    });
+
 
     /**
      * Enviar un mensaje, dos metodos disponibles en funcion de los paremetros que se pasen.
@@ -68,12 +124,12 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
      *      - message: contenido del mensaje que queremos enviar
      * El autor se obtendra a traves del header.
      */
-    app.post("/api/conversation/sendmessage", function (req, res) {
+    app.post("/api/conversation/:id", function (req, res) {
         //Parametros.
         let token = req.headers['token'] || req.body.token || req.query.token;
         let bidId = req.body.bidId; //ID a pasar a traves de un formulario.
         let message = req.body.message; //Mensaje que se pasa a traves de un formulario.
-        let conversationId = req.body.conversationId; //Id de la conversacion, no tiene por que tener si es nueva.
+        let conversationId = req.params.id; //Id de la conversacion, no tiene por que tener si es nueva.
 
         //Chequeamos que los dos atributos obligatorios no estan vacios.
         if (bidId == undefined && conversationId == undefined) {
@@ -244,9 +300,9 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
      *      - conversationId : Id de la conversacion
      * El autentificador de usuario se pasara en el header.
      */
-    app.post("/api/conversation/get", function (req, res) {
+    app.get("/api/conversation/:id", function (req, res) {
         let token = req.headers['token'] || req.body.token || req.query.token;
-        let conversationId = req.body.conversationId; //Id de la conversacion, no tiene por que tener si es nueva.
+        let conversationId = req.params.id; //Id de la conversacion, no tiene por que tener si es nueva.
 
         //Chequeamos que se pasa el id de conversacion
         if (conversationId == undefined) {
@@ -362,9 +418,9 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
      *      - conversationId : Id de la conversacion
      * El autentificador de usuario se pasara en el header.
      */
-    app.post("/api/conversation/delete", function (req, res) {
+    app.delete("/api/conversation/:id", function (req, res) {
         let token = req.headers['token'] || req.body.token || req.query.token;
-        let conversationId = req.body.conversationId; //Id de la conversacion, no tiene por que tener si es nueva.
+        let conversationId = req.params.id; //Id de la conversacion, no tiene por que tener si es nueva.
 
         //Chequeamos que se pasa el id de conversacion
         if (conversationId == undefined) {
