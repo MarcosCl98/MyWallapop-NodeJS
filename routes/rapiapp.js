@@ -8,32 +8,42 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
      * Este te devolvera un token necesario para acceder a todos los demas metodos.
      */
     app.post("/api/autenticar", function (req, res) {
-        let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
-            .update(req.body.password).digest('hex');
-        let criterio = {
-            email: req.body.email,
-            password: seguro
-        }
+        if (req.body.email.length <= 0) {
+            res.status(401);
+            res.json({error : "Error, campo email vacío."});
 
-        usersRepository.getUsers(criterio, function (usuarios) {
-            if (usuarios == null || usuarios.length == 0) {
-                res.status(401); // Unauthorized
-                res.json({
-                    autenticado: false
-                })
-            } else {
-                let token = app.get('jwt').sign(
-                    {usuario: criterio.email, tiempo: Date.now() / 1000},
-                    "secreto");
-                app.get('logger').debug("El siguiente usuario ha iniciado sesion: " + criterio.email);
-                res.status(200);
-                res.json({
-                    autenticado: true,
-                    token: token
-                })
+        } else if (req.body.password.length <= 0) {
+            res.redirect("/api/autenticar?mensaje=Error, campo contraseña vacío." +
+                "&tipoMensaje=alert-danger")
+        } else {
+
+            let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
+                .update(req.body.password).digest('hex');
+            let criterio = {
+                email: req.body.email,
+                password: seguro
             }
 
-        });
+            usersRepository.getUsers(criterio, function (usuarios) {
+                if (usuarios == null || usuarios.length == 0) {
+                    res.status(401); // Unauthorized
+                    res.json({
+                        autenticado: false
+                    })
+                } else {
+                    let token = app.get('jwt').sign(
+                        {usuario: criterio.email, tiempo: Date.now() / 1000},
+                        "secreto");
+                    app.get('logger').debug("El siguiente usuario ha iniciado sesion: " + criterio.email);
+                    res.status(200);
+                    res.json({
+                        autenticado: true,
+                        token: token
+                    })
+                }
+
+            });
+        }
     });
 
     /**
