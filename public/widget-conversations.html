@@ -19,72 +19,73 @@
 </div>
 
 <script>
+        clearInterval(refresh); //Lo primero que hacemos es parar el refrescador antiguo
 
-    clearInterval(refresh); //Lo primero que hacemos es parar el refrescador antiguo
+        window.history.pushState("", "", "/cliente.html?w=conversations");
 
-    window.history.pushState("", "", "/cliente.html?w=conversations");
+        var conversaciones;
 
-    var conversaciones;
-
-    function cargarConversaciones() {
-        $.ajax({
-            url: URLbase + "/conversation",
-            type: "GET",
-            data: {},
-            dataType: 'json',
-            headers: {"token": token},
-            success: function (respuesta) {
-                conversaciones = respuesta;
-                actualizarTabla(conversaciones);
-            },
-            error: function (error) {
-                $("#contenedor-principal").load("widget-login.html");
-            }
-        });
-    }
-
-    function actualizarTabla(converascionesMostrar) {
-        let conversations = "";
-        for (i = 0; i < converascionesMostrar.length; i++) {
-            conversations = conversations +
-                "<tr id=" + converascionesMostrar[i]._id + ">" +
-                "<td>" + converascionesMostrar[i].bidTitle + "</td>" +
-                "<td>" + converascionesMostrar[i].bidOwner + "</td>" +
-                "<td>" + converascionesMostrar[i].bidInterested + "</td>" +
-                "<td>" + converascionesMostrar[i].noReadMessages + "</td>" +
-                "<td>" +
-                "<a onclick=abrir('" + converascionesMostrar[i]._id + "')>Abrir</a><br>" +
-                "<a onclick=eliminar('" + converascionesMostrar[i]._id + "')>Eliminar</a>" +
-                "</td>" +
-                "</tr>";
+        function cargarConversaciones() {
+            $.ajax({
+                url: URLbase + "/conversation",
+                type: "GET",
+                data: {},
+                dataType: 'json',
+                headers: {"token": token},
+                success: function (respuesta) {
+                    conversaciones = respuesta;
+                    actualizarTabla(conversaciones);
+                },
+                error: function (error) {
+                    $("#contenedor-principal").load("widget-login.html");
+                }
+            });
         }
-        $("#tablaConversations").html(conversations);
-    }
 
-    cargarConversaciones();
-
-    refresh = setInterval(function() {
-        cargarConversaciones();
-    }, 5000);
-
-    function abrir(_id) {
-        idConversationSelected = _id;
-        $("#contenedor-principal").load("widget-conversation-chat.html");
-    }
-
-    function eliminar(_id) {
-        $.ajax({
-            url: URLbase + "/conversation/" + _id,
-            type: "DELETE",
-            data: {},
-            dataType: 'json',
-            headers: {"token": token},
-            success: function (respuesta) {
-            },
-            error: function (error) {
-                $("#contenedor-principal").load("widget-login.html");
+        function actualizarTabla(converascionesMostrar) {
+            let conversations = "";
+            for (i = 0; i < converascionesMostrar.length; i++) {
+                conversations = conversations +
+                    "<tr id=" + converascionesMostrar[i]._id + ">" +
+                    "<td>" + converascionesMostrar[i].bidTitle + "</td>" +
+                    "<td>" + converascionesMostrar[i].bidOwner + "</td>" +
+                    "<td>" + converascionesMostrar[i].bidInterested + "</td>" +
+                    "<td>" + converascionesMostrar[i].noReadMessages + "</td>" +
+                    "<td>" +
+                    "<a onclick=abrir('" + converascionesMostrar[i]._id + "')>Abrir</a><br>" +
+                    "<a onclick=eliminar('" + converascionesMostrar[i]._id + "')>Eliminar</a>" +
+                    "</td>" +
+                    "</tr>";
             }
-        });
-    }
+            $("#tablaConversations").html(conversations);
+        }
+
+        cargarConversaciones();
+
+        refresh = setInterval(function() {
+            cargarConversaciones();
+        }, 5000);
+
+        function abrir(_id) {
+            idConversationSelected = _id;
+            $("#contenedor-principal").load("widget-conversation-chat.html");
+        }
+
+        function eliminar(_id) {
+            $.ajax({
+                url: URLbase + "/conversation/" + _id,
+                type: "DELETE",
+                data: {},
+                dataType: 'json',
+                headers: {"token": token},
+                success: function (respuesta) {
+                },
+                error: function (error) {
+                    $("#contenedor-principal").load("widget-login.html");
+                }
+            });
+        }
+
+
 
 </script>

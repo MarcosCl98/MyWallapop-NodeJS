@@ -1,1 +1,63 @@
-<!-- Falta por que rellenes esto feno. -->
+<div id="widget-bids">
+    <h1>Ofertas</h1>
+    <p>Listado de ofertas disponibles</p>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Titulo oferta</th>
+            <th>Detalle</th>
+            <th>Precio</th>
+            <th>Vendedor</th>
+            <th class="col-md-1"></th>
+            <th class="col-md-1"></th>
+        </tr>
+        </thead>
+        <tbody id="tablaBids">
+
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+    clearInterval(refresh); //Lo primero que hacemos es parar el refrescador antiguo
+
+    window.history.pushState("", "", "/cliente.html?w=bids");
+
+    var bids;
+
+    function cargarBids() {
+        $.ajax({
+            url: URLbase + "/bid/notmybids",
+            type: "GET",
+            data: {},
+            dataType: 'json',
+            headers: {"token": token},
+            success: function (respuesta) {
+                bids = respuesta;
+                actualizarTabla(bids);
+            },
+            error: function (error) {
+                $("#contenedor-principal").load("widget-login.html");
+            }
+        });
+    }
+
+    function actualizarTabla(bidsMostrar) {
+        let bids = "";
+        for (i = 0; i < bidsMostrar.length; i++) {
+            bids = bids +
+                "<td>" + bidsMostrar[i].title + "</td>" +
+                "<td>" + bidsMostrar[i].description + "</td>" +
+                "<td>" + bidsMostrar[i].price + "</td>" +
+                "<td>" + bidsMostrar[i].userEmail + "</td>" +
+                "<td>" +
+                "</td>" +
+                "</tr>";
+        }
+        $("#tablaBids").html(bids);
+    }
+
+    cargarBids();
+
+</script>

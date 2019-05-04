@@ -11,10 +11,12 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
         if (req.body.email.length <= 0) {
             res.status(401);
             res.json({error : "Error, campo email vacío."});
+            res.send(null);
 
         } else if (req.body.password.length <= 0) {
-            res.redirect("/api/autenticar?mensaje=Error, campo contraseña vacío." +
-                "&tipoMensaje=alert-danger")
+            rres.status(401);
+            res.json({error : "Error, campo contraseña vacío."});
+            res.send(null);
         } else {
 
             let seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
@@ -30,7 +32,9 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                     res.json({
                         autenticado: false
                     })
+
                 } else {
+
                     let token = app.get('jwt').sign(
                         {usuario: criterio.email, tiempo: Date.now() / 1000},
                         "secreto");
@@ -40,6 +44,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                         autenticado: true,
                         token: token
                     })
+
                 }
 
             });
