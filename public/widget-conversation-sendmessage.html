@@ -1,0 +1,56 @@
+<div id="widget-conversation-sendmessage">
+    <h1>Chat</h1>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th>Escriba el mensaje a enviar</th>
+        </tr>
+        </thead>
+        <tbody id="tablaChat">
+
+        </tbody>
+    </table>
+    <div class="input-group input-group-lg">
+        <div class="input-group-prepend">
+            <span class="input-group-text" id="inputGroup-sizing-lg"></span>
+        </div>
+        <input id="messageContent" type="text" class="form-control" aria-label="Large"
+               aria-describedby="inputGroup-sizing-sm"/>
+    </div>
+    <br/>
+    <button id="buttonSend" onclick=sendMessage() type="button" class="btn btn-success">Enviar mensaje</button>
+</div>
+
+<script>
+
+    clearInterval(refresh); //Lo primero que hacemos es parar el refrescador antiguo
+
+    window.history.pushState("", "", "/cliente.html?w=sendmessage-chat");
+
+
+    function sendMessage() {
+        clearInterval(refresh);
+        let newMessage = document.getElementById("messageContent").value;
+        document.getElementById("messageContent").value = "";
+        $.ajax({
+            url: URLbase + "/conversation/" ,
+            type: "POST",
+            data: {message: newMessage, bidId: idBidMessage},
+            dataType: 'json',
+            headers: {"token": token},
+            success: function (respuesta) {
+                if ( $("#mensaje").length == 0 ) {
+                    $("#widget-conversation-sendmessage")
+                        .prepend("<div class='alert alert-success' id = 'mensaje'>Mensaje enviado correctamente.</div>");
+                }
+            },
+            error: function (error) {
+                $("#contenedor-principal").load("widget-login.html");
+            }
+        });
+
+    }
+
+
+
+</script>

@@ -40,11 +40,11 @@ module.exports = {
                 funcionCallback(null);
             } else {
                 let collection = db.collection('conversations');
-                collection.find(criterio).toArray(function (err, bids) {
+                collection.find(criterio).toArray(function (err, conversations) {
                     if (err) {
                         funcionCallback(null);
                     } else {
-                        funcionCallback(bids);
+                        funcionCallback(conversations);
                     }
                     db.close();
                 });

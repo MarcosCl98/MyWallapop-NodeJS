@@ -92,6 +92,10 @@
             dataType: 'json',
             headers: {"token": token},
             success: function (respuesta) {
+                if ( $("#mensaje").length == 0 ) {
+                    $("#widget-conversation-chat")
+                        .prepend("<div class='alert alert-success' id = 'mensaje'>Mensaje enviado correctamente.</div>");
+                }
             },
             error: function (error) {
                 $("#contenedor-principal").load("widget-login.html");

@@ -225,7 +225,6 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
         let bidId = req.body.bidId; //ID a pasar a traves de un formulario.
         let message = req.body.message; //Mensaje que se pasa a traves de un formulario.
         let conversationId = req.params.id; //Id de la conversacion, no tiene por que tener si es nueva.
-
         //Chequeamos que los dos atributos obligatorios no estan vacios.
         if (bidId == undefined && conversationId == undefined) {
             res.status(200);
