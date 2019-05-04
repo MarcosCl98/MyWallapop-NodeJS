@@ -39,10 +39,8 @@
             dataType: 'json',
             headers: {"token": token},
             success: function (respuesta) {
-                if ( $("#mensaje").length == 0 ) {
-                    $("#widget-conversation-sendmessage")
-                        .prepend("<div class='alert alert-success' id = 'mensaje'>Mensaje enviado correctamente.</div>");
-                }
+                idConversationSelected = respuesta.id;
+                $("#contenedor-principal").load("widget-conversation-chat.html");
             },
             error: function (error) {
                 $("#contenedor-principal").load("widget-login.html");

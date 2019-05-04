@@ -299,9 +299,12 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                                 });
                                             } else {
                                                 res.status(201); //Mensjae enviado correctamente.
+                                                var id = conversationRepository.mongo.ObjectID(newConversation._id)
                                                 res.json({
-                                                    message: "Conversacion creada y nuevo mensaje enviado."
+                                                    message: "Conversacion creada y nuevo mensaje enviado.",
+                                                    id:id
                                                 });
+                                                res.send(newConversation._id);
                                             }
                                         })
                                     } else { //La conversacion existe, mandamos el mensaje sobre la misma.
@@ -327,7 +330,8 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                                     } else {
                                                         res.status(201); //Mensjae enviado correctamente.
                                                         res.json({
-                                                            message: "Nuevo mensaje enviado. (la conversacion ya existia)"
+                                                            message: "Nuevo mensaje enviado. (la conversacion ya existia)",
+                                                            id: conversationRepository.mongo.ObjectID(conversations[0]._id)
                                                         });
                                                     }
                                                 });
