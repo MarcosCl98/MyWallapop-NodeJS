@@ -23,24 +23,6 @@
                 <td>{{bid.title}}</td>
                 <td>{{bid.description}}</td>
                 <td>{{bid.price}} €</td>
-                <!--
-                <div th:if="${bid.status == T(com.uniovi.entities.BidStatus).ACTIVED}">
-                    <td>
-                        <form th:action="${'/bid/mybids/delete/' + bid.id}">
-                            <button id="boton" type="submit" class="btn btn-default"
-                                    th:text="#{bid.list.delete}"
-                                    style="background-color: #C24641; color: white"></button>
-                        </form>
-                    </td>
-                </div>
-                <div th:unless="${bid.status == T(com.uniovi.entities.BidStatus).ACTIVED}">
-                    <td>
-                        <button class="btn btn-default"
-                                th:text="#{bid.buyed}"
-                                disabled></button>
-                    </td>
-                </div>
-                -- POR PONER ALGO -->
                 <td>
                     <form  method="post" action="/bid/mybids/buyed/{{ bid._id.toString() }}">
                         <button id="boton" type="submit" class="btn btn-default"

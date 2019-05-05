@@ -304,7 +304,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                                     message: "Conversacion creada y nuevo mensaje enviado.",
                                                     id:id
                                                 });
-                                                res.send(newConversation._id);
+
                                             }
                                         })
                                     } else { //La conversacion existe, mandamos el mensaje sobre la misma.

@@ -46,15 +46,16 @@
     function actualizarTabla(bidsMostrar) {
         let bids = "";
         for (i = 0; i < bidsMostrar.length; i++) {
-            bids = bids +
-                "<td>" + bidsMostrar[i].title + "</td>" +
-                "<td>" + bidsMostrar[i].description + "</td>" +
-                "<td>" + bidsMostrar[i].price + "</td>" +
-                "<td>" + bidsMostrar[i].userEmail + "</td>" +
-                "<td>" +
-                "<a onclick=abrir('" + bidsMostrar[i]._id + "')>Enviar mensaje</a><br>" +
-                "</td>" +
-                "</tr>";
+                bids = bids +
+                    "<tr>"+
+                    "<td>" + bidsMostrar[i].title + "</td>" +
+                    "<td>" + bidsMostrar[i].description + "</td>" +
+                    "<td>" + bidsMostrar[i].price + "</td>" +
+                    "<td>" + bidsMostrar[i].userEmail + "</td>" +
+                    "<td>" +
+                    "<a onclick=abrir('" + bidsMostrar[i]._id + "')>Enviar mensaje</a><br>" +
+                    "</td>" +
+                    "</tr>";
         }
         $("#tablaBids").html(bids);
     }

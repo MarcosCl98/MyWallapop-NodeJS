@@ -5,6 +5,7 @@ module.exports = function (app, swig, usersRepository, bidsRepository, conversat
             if (users == null) {
                 res.send("No hay ningun usuario.");
             } else {
+                console.log(users.length);
                 let respuesta = swig.renderFile('views/users/list.html',
                     {
                         users: users,
@@ -133,7 +134,7 @@ module.exports = function (app, swig, usersRepository, bidsRepository, conversat
                     req.session.money = usuarios[0].money;
                     req.session.usuario = usuarios[0].email;
                     res.redirect("/");
-                    app.get('logger').debug("El siguiente usuario ha iniciado sesion: " + usuario[0].email);
+                    app.get('logger').debug("El siguiente usuario ha iniciado sesion: " + usuarios[0].email);
                 }
             });
         }
