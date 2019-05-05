@@ -95,7 +95,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                 res.status(200);
                 let iteration = 0;
                 conversations.forEach(function (conversation) {
-                    bidsRepository.getBids({_id: bidsRepository.mongo.ObjectID(conversation.bidId)}, function (bids) {
+                    bidsRepository.getBids({_id: conversation.bidId}, function (bids) {
                         conversation.bidTitle = bids[0].title;
                         let noReadMessages = 0;
                         conversation.messages.forEach(function(message) {
@@ -125,7 +125,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
         let loginUserEmail = decoded.usuario;
         let idConversation = req.params.id;
         conversationRepository.getConversations({
-            $and: [{_id: conversationRepository.mongo.ObjectID(idConversation)},
+            $and: [{_id: idConversation},
                 {$or: [{bidOwner: loginUserEmail}, {bidInterested: loginUserEmail}]}]
         }, function (conversations) {
             if (conversations == null) {
@@ -168,7 +168,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
             let loginUserEmail = decoded.usuario; //Aqui obtenemos el usuario a traves de usar jwt
 
             conversationRepository.getConversations(
-                {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                {_id:conversationId},
                 function (conversations) {
                     if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
                         res.status(500); //Error de servidor
@@ -185,7 +185,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                             }
                         });
                         conversationRepository.updateConversation(
-                            {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                            {_id: conversationId},
                             updatedConversation,
                             function (conversation) {
                                 if (conversation == null) {
@@ -259,7 +259,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
             //Revisar que se mande un mensaje a su propia oferta, si es asi enviar error
             //En principio aunque la oferta ya este vendida se podra enviar mensajes tambien.
             if (conversationId == undefined) {
-                bidsRepository.getBids({_id: bidsRepository.mongo.ObjectID(bidId)}, function (bid) {
+                bidsRepository.getBids({_id: bidId}, function (bid) {
                     if (bid == null || bid.length == 0) { //Si no se paso la oferta es que no existe
                         res.status(200);
                         res.json({
@@ -299,7 +299,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                                 });
                                             } else {
                                                 res.status(201); //Mensjae enviado correctamente.
-                                                var id = conversationRepository.mongo.ObjectID(newConversation._id)
+                                                var id = newConversation._id
                                                 res.json({
                                                     message: "Conversacion creada y nuevo mensaje enviado.",
                                                     id:id
@@ -319,7 +319,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                                 false //No ha sido leido por defecto
                                             ]);
                                             conversationRepository.updateConversation(
-                                                {_id: conversationRepository.mongo.ObjectID(conversations[0]._id)},
+                                                {_id: conversations[0]._id},
                                                 conversation,
                                                 function (conversationReturn) {
                                                     if (conversationReturn == null) {
@@ -331,7 +331,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                                         res.status(201); //Mensjae enviado correctamente.
                                                         res.json({
                                                             message: "Nuevo mensaje enviado. (la conversacion ya existia)",
-                                                            id: conversationRepository.mongo.ObjectID(conversations[0]._id)
+                                                            id: conversations[0]._id
                                                         });
                                                     }
                                                 });
@@ -349,7 +349,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                     })
                 } else {
                     conversationRepository.getConversations(
-                        {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                        {_id: conversationId},
                         function (conversations) {
                             if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
                                 res.status(500); //Error de servidor
@@ -368,7 +368,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                                         false //No ha sido leido por defecto
                                     ]);
                                     conversationRepository.updateConversation(
-                                        {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                                        {_id: conversationId},
                                         conversation,
                                         function (conversation) {
                                             if (conversation == null) {
@@ -423,7 +423,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
             let loginUserEmail = decoded.usuario; //Aqui obtenemos el usuario a traves de usar jwt
 
             conversationRepository.getConversations(
-                {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                {_id: conversationId},
                 function (conversations) {
                     if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
                         res.status(500); //Error de servidor
@@ -472,7 +472,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
             let loginUserEmail = decoded.usuario; //Aqui obtenemos el usuario a traves de usar jwt
 
             conversationRepository.getConversations(
-                {_id: conversationRepository.mongo.ObjectID(conversationId)},
+                {_id: conversationId},
                 function (conversations) {
                     if (conversations == null || conversations.length == 0) { //Esa conversacion no existe
                         res.status(500); //Error de servidor
@@ -482,7 +482,7 @@ module.exports = function (app, bidsRepository, usersRepository, conversationRep
                     } else if (conversations[0].bidOwner == loginUserEmail ||
                         conversations[0].bidInterested == loginUserEmail) {
                         //Es participante, por tanto hay que borrar la conversacion
-                        conversationRepository.removeConversation({_id: conversationRepository.mongo.ObjectID(conversationId)},
+                        conversationRepository.removeConversation({_id: conversationId},
                             function (conversation) {
                                 if (conversation == null) {
                                     res.status(500);

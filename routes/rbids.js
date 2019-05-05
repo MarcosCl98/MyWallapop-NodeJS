@@ -96,11 +96,12 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
         //chequear si tiene dinero
         userRepository.getUsers({email: req.session.usuario}, function (users) {
             let user = users[0];
+            console.log(user.money);
             if (user.money == null || user.money < 20.0) {
                 res.redirect("/bid/mybids?mensaje=No tienes 20€ o mas para poder destacar la oferta." +
                     "&tipoMensaje=alert-danger");
             } else {
-                bidsRepository.getBids({_id: bidsRepository.mongo.ObjectID(req.body.id)}, function (bids) {
+                bidsRepository.getBids({_id: req.body.id}, function (bids) {
                     let bid = bids[0];
                     if (bid.buyerEmail != null) {
                         res.redirect("/bid/mybids?mensaje=Esa oferta no se puede destacar por que ya fue vendida." +
@@ -118,7 +119,7 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
                                     "&tipoMensaje=alert-danger");
                             } else {
                                 bid.isSpecial = 'on';
-                                bidsRepository.updateBid({_id: bidsRepository.mongo.ObjectID(req.body.id)}, bid, function (result2) {
+                                bidsRepository.updateBid({_id: req.body.id}, bid, function (result2) {
                                     if (result2 == null) {
                                         res.redirect("/bid/mybids?mensaje=Ocurrio un error al actualizar la oferta y no se completo la transaccion." +
                                             "&tipoMensaje=alert-danger");

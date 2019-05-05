@@ -15,7 +15,7 @@
     </div>
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
-            <button id="boton-login" type="button">Iniciar sesion</button>
+            <button name = "boton" id="boton-login" type="button">Iniciar sesion</button>
         </div>
     </div>
 </div>
@@ -36,6 +36,7 @@
                 token = respuesta.token;
                 Cookies.set('token', respuesta.token);
                 $("#contenedor-principal").load("widget-bids.html");
+
             },
             error: function (error) {
                 Cookies.remove('token');

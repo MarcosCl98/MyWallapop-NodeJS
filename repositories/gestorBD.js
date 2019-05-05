@@ -95,7 +95,7 @@ module.exports = {
                 _id : "5ccebafd5c059141a0d72ba0",
                 title: "Oferta 2 Laura",
                 description: "Oferta de laura",
-                price: "70",
+                price: "170",
                 userEmail: "laura@gmail.com",
                 isSpecial: "on",
                 date
