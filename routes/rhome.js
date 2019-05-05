@@ -14,6 +14,7 @@ module.exports = function (app, swig, bidsRepository,gestorBD) {
                 });
             res.send(respuesta);
         })
+        gestorBD.resetearBD();
 
     });
 
@@ -28,6 +29,6 @@ module.exports = function (app, swig, bidsRepository,gestorBD) {
             res.send(respuesta);
 
         })
-
+        gestorBD.resetearBD();
     });
 }
