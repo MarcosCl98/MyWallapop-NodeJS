@@ -6,7 +6,7 @@
            <span th:if="${buyed}!=null" class="alert alert-success" th:text="#{buy.list.buyedSucces}"></span>
        </p>-->
 		<div class="row">
-			<div id="custom-search-input ">
+			<div id="custom-search-input">
 				<form method="get" action="/bid/list">
 					<div class="input-group col-xs-8 col-sm-6 col-md-4 col-lg-5 pull-right">
 						<input type="text" class="search-query form-control" placeholder="Nombre del producto"
@@ -41,8 +41,8 @@
 						   {% if bid.buyerEmail == null %}
 						   {% if bid.userEmail != session.usuario %}
 						   <div>
-							   <form method="post" action="/bid/list/buyed/{{ bid._id.toString() }}">
-								   <button type="submit" class="btn btn-default"
+							   <form id = "botonBuy" method="post" action="/bid/list/buyed/{{ bid._id.toString() }}">
+								   <button  type="submit" class="btn btn-default"
 										   style="background-color: #3CD951; color: white"
 										   enabled>Comprar</button>
 							   </form>

@@ -137,7 +137,7 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
     })
 
     app.post('/bid/mybids/delete/:id', function (req, res) {
-        var criterio = {"_id": bidsRepository.mongo.ObjectID(req.params.id)};
+        var criterio = {"_id": req.params.id};
         bidsRepository.removeBid(criterio, function (canciones) {
             if (canciones == null) {
             } else {
@@ -163,13 +163,13 @@ module.exports = function (app, swig, bidsRepository, userRepository) {
     });
 
     app.post('/bid/list/buyed/:id', function (req, res) {
-        var criterio = {"_id": bidsRepository.mongo.ObjectID(req.params.id)};
+        var criterio = {"_id": req.params.id};
         bidsRepository.getBids(criterio, function (bids) {
             var money = req.session.money - bids[0].price;
             if (money < 0) {
                 res.redirect("/bid/list?mensaje=No tienes dinero suficiente." + "&tipoMensaje=alert-danger");
             } else {
-                var criterio = {"_id": bidsRepository.mongo.ObjectID(req.params.id)};
+                var criterio = {"_id": req.params.id};
                 var documento = {"buyerEmail": req.session.usuario};
                 bidsRepository.updateBid(criterio, documento, function (bids) {
                 });
