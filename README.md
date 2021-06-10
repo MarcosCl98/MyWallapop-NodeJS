@@ -1,2 +1,2 @@
-# sdi-actividad2-104-106
-Proyecto en NodeJS MyWallapop para la asignatura de SDI.
+# MyWallapop-NodeJS
+Project in NodeJS MyWallapop for the subject of Distributed Systems and Internet. 
